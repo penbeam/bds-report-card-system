@@ -1791,7 +1791,7 @@ function debounceCheck() {
             showPreview();
             updateDashboardMetrics();
         };
- 
+
 
         // SINGLE SCHOOL-WIDE CONNECTION SOURCE (configure before publishing to GitHub Pages).
         // Paste the Apps Script production URL ending in /exec below. Do not put credentials here.
@@ -1804,6 +1804,58 @@ function debounceCheck() {
             catch (_) { return false; }
         }
         function bdsCurrentEndpoint() { return bdsValidEndpoint(BDS_DEPLOYED_ENDPOINT) ? BDS_DEPLOYED_ENDPOINT : ''; }
+        // Session storage survives a page refresh in this tab, but not a closed tab.
+        // This stores a bearer token only, never the shared school password.
+        function bdsSessionStorageKey() { return bdsCacheKey('staff_session'); }
+        function bdsRememberSession(token, expiresAt) {
+            try { sessionStorage.setItem(bdsSessionStorageKey(), JSON.stringify({ token, expiresAt })); } catch (_) {}
+        }
+        function bdsForgetSession() {
+            try { sessionStorage.removeItem(bdsSessionStorageKey()); } catch (_) {}
+        }
+        async function bdsOpenAuthenticatedWorkspace() {
+            document.getElementById('bds-access-gate').hidden = true;
+            document.getElementById('bds-report-app').hidden = false;
+            await checkConnection();
+            await loadSubjectCatalogue();
+            // New forms get the school's active catalogue, or the 11 starter subjects
+            // when no catalogue has been returned. Existing record edits are unchanged.
+            if (!isEditMode) loadSubjects();
+            await fetchAllStudents({ quiet: true }).catch(error => {
+                console.warn('Initial student refresh failed:', error.message);
+            });
+            updateDashboardMetrics();
+        }
+        async function bdsRestoreSession() {
+            let saved;
+            try { saved = JSON.parse(sessionStorage.getItem(bdsSessionStorageKey()) || 'null'); } catch (_) { saved = null; }
+            if (!saved || !/^[a-f0-9]{64}$/.test(String(saved.token || '')) || !Number.isFinite(Number(saved.expiresAt)) || Date.now() >= Number(saved.expiresAt)) {
+                bdsForgetSession();
+                return;
+            }
+            const message = document.getElementById('bdsLoginMessage');
+            message.textContent = 'Restoring your staff session...';
+            bdsSessionToken = saved.token;
+            try {
+                const status = await jsonpRequest({ action: 'sessionStatus' }, 12000);
+                if (!status || status.success !== true || status.authenticated !== true) throw new Error('Session is no longer valid.');
+                message.textContent = '';
+                await bdsOpenAuthenticatedWorkspace();
+            } catch (error) {
+                // Never unlock student data unless the server verified this session.
+                // A temporary network failure does not destroy a still-valid saved session.
+                if (/Authentication required|session expired|no longer valid/i.test(String(error.message || ''))) {
+                    bdsForgetSession();
+                    bdsSessionToken = '';
+                    message.textContent = 'Your session expired. Please sign in again.';
+                } else {
+                    bdsSessionToken = '';
+                    message.textContent = 'Unable to restore your session. Check your connection and refresh, or sign in again.';
+                }
+                document.getElementById('bds-report-app').hidden = true;
+                document.getElementById('bds-access-gate').hidden = false;
+            }
+        }
         function bdsInitializeAccess() {
             // Discard legacy device-specific configuration; it must never override the deployed URL.
             try {
@@ -1819,7 +1871,8 @@ function debounceCheck() {
             });
             document.getElementById('bdsLoginMessage').textContent = bdsCurrentEndpoint() ? '' :
                 'Connection is not configured. The website owner must publish a valid Apps Script /exec URL in index.html.';
-            // Session token is intentionally not persisted across browser restarts or refreshes.
+            // Validate an existing same-tab session before showing any student data.
+            void bdsRestoreSession();
         }
         async function bdsLogin(event) {
             event.preventDefault();
@@ -1843,18 +1896,14 @@ function debounceCheck() {
                 }
                 if (!result || !result.success || !result.sessionToken) throw new Error((result && result.error) || 'Login was not confirmed. Try again.');
                 bdsSessionToken = result.sessionToken;
+                bdsRememberSession(result.sessionToken, result.expiresAt);
                 document.getElementById('bdsLoginPassword').value = '';
-                document.getElementById('bds-access-gate').hidden = true;
-                document.getElementById('bds-report-app').hidden = false;
-                await checkConnection();
-                await loadSubjectCatalogue();
-                loadSubjects();
-                await fetchAllStudents({quiet: true}).catch(() => {});
-                updateDashboardMetrics();
+                await bdsOpenAuthenticatedWorkspace();
             } catch (error) { message.textContent = error.message; }
             finally { button.disabled = false; }
         }
         function bdsRequireLogin() {
+            bdsForgetSession();
             bdsSessionToken = '';
             bdsPendingWrite = null;
             bdsAuthoritativeStudents = []; allStudents = []; subjectCatalogue = [];
@@ -1989,8 +2038,12 @@ function debounceCheck() {
             if (!tbody) return;
             tbody.innerHTML = '';
             const activeSubjects = subjectCatalogue.filter(subject => subject.status !== 'Inactive');
-            const subjectsToLoad = bdsCatalogueLoaded ? activeSubjects : (subjectCatalogue.length ? activeSubjects : defaultSubjects);
-            subjectsToLoad.forEach(subject => addSubjectRow(subject.name, subject.defaultTotalMarks || subject.totalMarks || 100, '', '', '', subject.subjectId || ''));
+            // A new blank form should retain the 11-subject starter layout even when
+            // the catalogue request fails or the catalogue has no entries yet.
+            // An intentionally deactivated catalogue is not restored implicitly.
+            const useStarterSubjects = subjectCatalogue.length === 0;
+            const subjectsToLoad = useStarterSubjects ? defaultSubjects : activeSubjects;
+            subjectsToLoad.forEach(subject => addSubjectRow(subject.name, subject.defaultTotalMarks || subject.totalMarks || 100, '', '', '', useStarterSubjects ? '' : (subject.subjectId || '')));
         }
 
         function addSubjectRow(name = '', totalMarks = 100, obtained = '', remarks = '', signature = '', subjectId = '') {
