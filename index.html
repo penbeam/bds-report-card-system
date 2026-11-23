@@ -1,0 +1,3425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GGHS Benazir | Student Report Card System</title>
+    <meta name="description" content="GGHS Benazir student report card management system for academic records, subject assessments and report printing.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#173d56">
+    <style>
+        /* =============================================
+           CSS RESET & VARIABLES - Professional Grade
+        ============================================= */
+        #bds-report-app, #bds-report-app *, #bds-report-app *::before, #bds-report-app *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #bds-report-app {
+            --primary:#173d56; --primary-dark:#102c3d; --primary-light:#2b6079; --secondary:#2e667a;
+            --accent:#dcac63; --success:#18765d; --danger:#b84148; --warning:#e9b35e; --info:#197b97;
+            --light:#f6f8f8; --dark:#233b49; --gray:#617681; --gray-light:#dce7e9; --white:#ffffff;
+            --shadow-sm:0 3px 12px rgba(16,48,67,.055); --shadow-md:0 11px 30px rgba(16,48,67,.075);
+            --shadow-lg:0 20px 50px rgba(16,48,67,.12); --radius-sm:11px; --radius-md:17px;
+            --radius-lg:24px; --transition:background .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+            --bds-ink:#17394d; --bds-muted:#637985; --bds-line:#dce7e9; --bds-blue:#173d56;
+            --bds-cyan:#197b97; --bds-paper:#ffffff; --bds-canvas:#f1f5f5;
+            min-width:0; color:var(--bds-ink);
+        }
+
+        body.bds-page {
+            font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif; background:#f1f5f5;
+            background-image:radial-gradient(ellipse at 90% -15%,rgba(32,114,142,.13),transparent 44%);
+            min-height:100vh; padding:clamp(12px,2.4vw,30px); line-height:1.55; color:#233b49;
+        }
+
+        #bds-report-app.container {
+            max-width:1360px; width:100%; margin:0 auto;
+        }
+
+        /* =============================================
+           HEADER - Professional Gradient
+        ============================================= */
+
+        #bds-report-app .header {
+            background:linear-gradient(115deg,#10344b 0%,#1b5366 68%,#236979 100%); color:#fff;
+            padding:clamp(28px,4vw,54px) clamp(22px,5vw,64px); border-radius:26px;
+            margin-bottom:18px; text-align:left; box-shadow:0 18px 42px rgba(16,52,75,.17);
+            position:relative; overflow:hidden; isolation:isolate;
+        }
+
+        #bds-report-app .header::before {
+            content:""; position:absolute; width:470px; height:470px; top:-250px; right:-80px;
+            border:1px solid rgba(255,255,255,.16); border-radius:50%; box-shadow:0 0 0 70px rgba(255,255,255,.035),0 0 0 145px rgba(255,255,255,.025);
+            pointer-events:none;
+        }
+
+        #bds-report-app .header h1 {
+            font-size:clamp(24px,3vw,39px); font-weight:800; max-width:850px;
+            line-height:1.17; margin-bottom:11px; letter-spacing:-.045em; position:relative;
+        }
+
+        #bds-report-app .header p {
+            font-size:clamp(13px,1.5vw,16px); color:#cfdee3; font-weight:500; position:relative;
+        }
+
+        /* =============================================
+           URL INPUT - Clean & Professional
+        ============================================= */
+
+        #bds-report-app .url-section {
+            background:var(--white); padding:clamp(17px,2.2vw,24px); border-radius:18px;
+            margin-bottom:18px; box-shadow:var(--shadow-sm); border:1px solid var(--bds-line);
+        }
+
+        #bds-report-app .url-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        #bds-report-app .url-input-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        #bds-report-app .url-input-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: monospace;
+        }
+
+        #bds-report-app .url-input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
+        }
+
+        #bds-report-app .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        #bds-report-app .status-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #bds-report-app .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* =============================================
+           TABS - Mobile First Design
+        ============================================= */
+
+        #bds-report-app .tabs {
+            display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;
+            margin-bottom:18px; background:#e5edf0; padding:7px; border-radius:17px; border:1px solid #dbe7ea;
+        }
+
+        #bds-report-app .tab {
+            width:100%; min-width:0; min-height:52px; padding:12px 10px; border:0; border-radius:12px;
+            cursor:pointer; background:transparent; color:#456171; font-weight:750; font-size:14px;
+            transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+
+        #bds-report-app .tab i {
+            font-size: 16px;
+        }
+
+        #bds-report-app .tab.active {
+            background:#fff; color:#143f56; box-shadow:0 5px 16px rgba(16,48,67,.1);
+        }
+
+        #bds-report-app .tab:active {
+            transform: scale(0.98);
+        }
+
+        /* =============================================
+           CARDS - Professional Cards
+        ============================================= */
+
+        #bds-report-app .card {
+            background:var(--white); border-radius:var(--radius-lg); padding:clamp(18px,2.5vw,30px);
+            margin-bottom:18px; box-shadow:var(--shadow-sm); border:1px solid var(--bds-line); min-width:0;
+        }
+
+
+        #bds-report-app .card h2 {
+            color:var(--bds-ink); margin-bottom:24px; padding-bottom:15px; border-bottom:1px solid var(--bds-line);
+            font-size:clamp(18px,2vw,22px); font-weight:800; display:flex; align-items:center; gap:10px; letter-spacing:-.025em;
+        }
+
+        /* =============================================
+           FORM - Mobile First Grid
+        ============================================= */
+        #bds-report-app .academic-row {
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px)  {
+            #bds-report-app .academic-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        #bds-report-app .academic-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #bds-report-app .academic-field label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        #bds-report-app .academic-field input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        #bds-report-app .academic-field input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
+        }
+
+        #bds-report-app .academic-field .hint {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+
+        #bds-report-app .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 640px)  {
+            #bds-report-app .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px)  {
+            #bds-report-app .form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        #bds-report-app .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #bds-report-app .form-group label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #bds-report-app .form-group label .required {
+            color: var(--danger);
+            font-size: 12px;
+        }
+
+        #bds-report-app .form-group input, #bds-report-app .form-group textarea {
+            padding: 14px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        #bds-report-app .form-group input:focus, #bds-report-app .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
+        }
+
+        /* =============================================
+           TABLE - Mobile Optimized
+        ============================================= */
+
+        #bds-report-app .table-container {
+            width:100%; max-width:100%; overflow-x:auto; margin:16px 0; border-radius:15px;
+            border:1px solid var(--bds-line); -webkit-overflow-scrolling:touch;
+            scrollbar-width:thin; scrollbar-color:#8eb0be #e9f1f3;
+        }
+
+        #bds-report-app .bds-mobile-table-hint {
+            display: none;
+            align-items: center;
+            gap: 7px;
+            margin: 10px 0 0;
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: #edf4ff;
+            color: #244d83;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        #bds-report-app table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            font-size: 14px;
+        }
+
+        #bds-report-app th {
+            background:#e9f1f4; color:#315265; padding:15px 12px; font-weight:800; font-size:11px;
+            text-transform:uppercase; letter-spacing:.09em; white-space:nowrap; text-align:left;
+        }
+
+        #bds-report-app td {
+            padding:11px 9px; border-bottom:1px solid #e7edef; vertical-align:middle;
+        }
+
+        #bds-report-app td input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        #bds-report-app td input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(30,60,114,0.1);
+        }
+
+        #bds-report-app .percentage-display, #bds-report-app .grade-display {
+            text-align: center;
+            font-weight: 700;
+            padding: 8px;
+            background: var(--light);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        /* =============================================
+           SIGNATURES - Responsive Grid
+        ============================================= */
+        #bds-report-app .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        @media (min-width: 480px)  {
+            #bds-report-app .signatures-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 768px)  {
+            #bds-report-app .signatures-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        #bds-report-app .signature-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #bds-report-app .signature-field label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 13px;
+        }
+
+        #bds-report-app .signature-field input {
+            padding: 12px;
+            border: none;
+            border-bottom: 2px solid var(--primary);
+            background: var(--light);
+            font-size: 14px;
+            transition: var(--transition);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+
+        #bds-report-app .signature-field input:focus {
+            outline: none;
+            border-bottom-color: var(--primary-light);
+            background: var(--white);
+        }
+
+        /* =============================================
+           BUTTONS - Professional & Touch-Friendly
+        ============================================= */
+        #bds-report-app .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 24px 0 8px;
+        }
+
+        #bds-report-app .btn {
+            flex:0 1 auto; min-width:140px; min-height:46px; padding:12px 19px; border:1px solid transparent;
+            border-radius:12px; font-weight:750; font-size:14px; cursor:pointer; transition:var(--transition);
+            color:var(--white); display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            box-shadow:none; letter-spacing:0; -webkit-tap-highlight-color:transparent; text-decoration:none;
+        }
+
+        #bds-report-app .btn:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        #bds-report-app .btn-primary {
+            background:#174b65;
+        }
+
+        #bds-report-app .btn-success {
+            background:#19745d;
+        }
+
+        #bds-report-app .btn-warning {
+            background:#f4e4c5; color:#69481d;
+        }
+
+        #bds-report-app .btn-info {
+            background:#216c85;
+        }
+
+        #bds-report-app .btn-secondary {
+            background:#e9eff2; color:#365468; border-color:#d6e2e8;
+        }
+
+        #bds-report-app .btn-danger {
+            background:#b84148;
+        }
+
+        /* =============================================
+           SEARCH SECTION - Enhanced with Class Filters
+        ============================================= */
+        #bds-report-app .search-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 640px)  {
+            #bds-report-app .search-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        #bds-report-app .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            align-items: flex-end;
+        }
+
+        #bds-report-app .filter-group {
+            flex: 1 1 200px;
+            min-width: 160px;
+        }
+
+        #bds-report-app .filter-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        #bds-report-app .filter-group select, #bds-report-app .filter-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            background: var(--white);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        #bds-report-app .filter-group select:focus, #bds-report-app .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
+        }
+
+        #bds-report-app .filter-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        #bds-report-app .filter-group select option {
+            padding: 8px;
+        }
+
+        #bds-report-app .search-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        #bds-report-app .search-input-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        #bds-report-app .search-input-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        #bds-report-app .search-input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
+        }
+
+        /* Active filter indicator */
+        #bds-report-app .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+            padding: 8px 12px;
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        #bds-report-app .filter-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #bds-report-app .filter-badge button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+            padding: 0 4px;
+        }
+
+        #bds-report-app .filter-badge button:hover {
+            opacity: 1;
+        }
+
+        /* =============================================
+           RESULTS TABLE - Mobile Friendly
+        ============================================= */
+        #bds-report-app .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            font-size: 14px;
+        }
+
+        #bds-report-app .results-table th {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--white);
+            padding: 14px 10px;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        #bds-report-app .results-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        #bds-report-app .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        #bds-report-app .load-btn, #bds-report-app .edit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 2px;
+        }
+
+        #bds-report-app .edit-btn {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+
+        #bds-report-app .load-btn:hover, #bds-report-app .edit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        #bds-report-app .load-btn:active, #bds-report-app .edit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* =============================================
+           REPORT PREVIEW - Clean Display
+        ============================================= */
+
+        #bds-report-app .report-preview {
+            background:#f8fafb; padding:clamp(12px,2vw,22px); border-radius:16px;
+            border:1px solid var(--bds-line); min-height:240px; overflow-x:auto; margin-bottom:20px;
+        }
+
+        /* =============================================
+           MESSAGES & LOADING
+        ============================================= */
+        #bds-report-app .message {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin: 16px 0;
+            display: none;
+            font-weight: 500;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn  {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #bds-report-app .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        #bds-report-app .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        #bds-report-app .message.info {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+            display: block;
+        }
+
+        #bds-report-app .spinner {
+            border: 4px solid rgba(30,60,114,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 30px auto;
+            display: none;
+        }
+
+        @keyframes spin  {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* =============================================
+           TAB CONTENT
+        ============================================= */
+        #bds-report-app .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn  {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #bds-report-app .tab-content.active {
+            display: block;
+        }
+
+        /* =============================================
+           UTILITIES
+        ============================================= */
+        #bds-report-app .text-center { text-align: center; }
+        #bds-report-app .mt-2 { margin-top: 8px; }
+        #bds-report-app .mt-4 { margin-top: 16px; }
+        #bds-report-app .mb-2 { margin-bottom: 8px; }
+        #bds-report-app .mb-4 { margin-bottom: 16px; }
+        #bds-report-app .w-100 { width: 100%; }
+
+        /* =============================================
+           RESPONSIVE FIXES
+        ============================================= */
+        @media (max-width: 768px)  {
+            #bds-report-app .filter-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            #bds-report-app .filter-group {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px)  {
+            body.bds-page { padding: 12px; }
+            
+            #bds-report-app .tabs {
+                padding: 4px;
+            }
+            
+            #bds-report-app .tab {
+                padding: 10px 4px;
+                font-size: 12px;
+            }
+            
+            #bds-report-app .btn {
+                width: 100%;
+                min-width: auto;
+                padding: 14px 20px;
+            }
+            
+            #bds-report-app .search-input-group {
+                flex-direction: column;
+            }
+            
+            #bds-report-app .search-actions {
+                flex-direction: column;
+            }
+            
+            #bds-report-app .url-input-group {
+                flex-direction: column;
+            }
+            
+            #bds-report-app .status-badge {
+                align-self: flex-start;
+            }
+            
+            #bds-report-app .signatures-grid {
+                gap: 12px;
+            }
+            
+            #bds-report-app .results-table {
+                font-size: 12px;
+            }
+            
+            #bds-report-app .results-table th, #bds-report-app .results-table td {
+                padding: 8px 6px;
+            }
+            
+            #bds-report-app .load-btn, #bds-report-app .edit-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            
+            #bds-report-app .filter-row {
+                gap: 10px;
+            }
+            
+            #bds-report-app .academic-row {
+                grid-template-columns: 1fr;
+            }
+
+            #bds-report-app .bds-mobile-table-hint {
+                display: flex;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse)  {
+            #bds-report-app .btn, #bds-report-app .tab, #bds-report-app .load-btn, #bds-report-app .edit-btn, #bds-report-app .filter-group select {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            #bds-report-app .btn:active, #bds-report-app .tab:active, #bds-report-app .load-btn:active, #bds-report-app .edit-btn:active {
+                opacity: 0.8;
+            }
+        }
+        
+        /* Duplicate warning modal */
+        #bds-report-app .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #bds-report-app .modal.active {
+            display: flex;
+        }
+        
+        #bds-report-app .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        #bds-report-app .modal-content h3 {
+            color: var(--danger);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        #bds-report-app .modal-content p {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        #bds-report-app .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        #bds-report-app .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        #bds-report-app .modal-btn.cancel {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+        
+        #bds-report-app .modal-btn.cancel:hover {
+            background: var(--gray);
+            color: white;
+        }
+        
+        #bds-report-app .modal-btn.save {
+            background: var(--danger);
+            color: white;
+        }
+        
+        #bds-report-app .modal-btn.save:hover {
+            background: #c82333;
+        }
+        
+        /* Edit mode indicator */
+        #bds-report-app .edit-mode-indicator {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: var(--dark);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        #bds-report-app .edit-mode-indicator i {
+            font-size: 16px;
+        }
+        
+        #bds-report-app .cancel-edit-btn {
+            background: transparent;
+            border: 1px solid var(--dark);
+            color: var(--dark);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        #bds-report-app .cancel-edit-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+/* Export Modal (uses same modal style as duplicate modal) */
+#bds-report-app #exportModal .modal-content {
+    max-width: 400px;
+}
+
+#bds-report-app #exportModal label {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#bds-report-app #exportModal label:hover {
+    background: var(--light);
+}
+
+#bds-report-app #exportModal input[type="radio"] {
+    margin-right: 10px;
+}
+
+/* WhatsApp button style */
+#bds-report-app .btn-whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+#bds-report-app .btn-whatsapp:hover {
+    background: #128C7E;
+}
+
+/* Disabled button style */
+#bds-report-app .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+
+
+        /* BDS v2 experience layer: new components use a dedicated namespace. */
+        #bds-report-app .bds-support {
+            position: relative; display: grid; grid-template-columns: minmax(0,1.25fr) minmax(260px,.75fr);
+            gap: 20px; align-items: center; overflow: hidden; margin: 0 0 20px; padding: 22px 24px;
+            border: 1px solid rgba(255,255,255,.65); border-radius: 20px;
+            background: linear-gradient(125deg,#fff 0%,#f5f9ff 58%,#edf5ff 100%);
+            box-shadow: 0 14px 36px rgba(24,58,112,.09); isolation: isolate;
+            animation: bds-rise-in .55s ease both;
+        }
+        #bds-report-app .bds-support::before { content:""; position:absolute; width:240px; height:240px; right:-90px; top:-130px; border-radius:50%; background:radial-gradient(circle,rgba(34,145,190,.16),transparent 70%); z-index:-1; }
+        #bds-report-app .bds-support-copy { display:flex; gap:15px; align-items:center; min-width:0; }
+        #bds-report-app .bds-support-icon { width:54px; height:54px; display:grid; place-items:center; flex:0 0 auto; border-radius:17px; color:#fff; font-size:25px; background:linear-gradient(145deg,#183a70,#2777a8); box-shadow:0 9px 20px rgba(24,58,112,.22); }
+        #bds-report-app .bds-support h2 { margin:0; color:#172b4d; font-size:clamp(17px,2.5vw,21px); letter-spacing:-.35px; }
+        #bds-report-app .bds-support p { margin:5px 0 0; color:#64748b; font-size:14px; }
+        #bds-report-app .bds-support-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:9px; }
+        #bds-report-app .bds-contact-action { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 15px; border-radius:12px; text-decoration:none; color:#fff; font-size:13px; font-weight:700; box-shadow:0 6px 14px rgba(20,40,70,.12); transition:transform .2s ease,box-shadow .2s ease,filter .2s ease; }
+        #bds-report-app .bds-contact-action:hover { transform:translateY(-3px); box-shadow:0 11px 22px rgba(20,40,70,.17); filter:saturate(1.08); }
+        #bds-report-app .bds-contact-action:active { transform:translateY(0) scale(.98); }
+        #bds-report-app .bds-contact-whatsapp { background:#159b62; }
+        #bds-report-app .bds-contact-email { background:#315f9f; }
+        #bds-report-app .bds-contact-call { background:#596b83; }
+        #bds-report-app .bds-subject-toolbar { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px; }
+        #bds-report-app .bds-manage-subjects { background:linear-gradient(135deg,#183a70,#2a6295); }
+        #bds-report-app .bds-subject-hint { color:#64748b; font-size:12px; margin:2px 0 12px; }
+        #bds-report-app .bds-modal-content { width:min(560px,94vw); max-height:min(82vh,760px); overflow:auto; padding:24px; border:1px solid #e3eaf3; border-radius:20px; box-shadow:0 24px 70px rgba(14,32,61,.24); animation:bds-modal-in .22s ease both; }
+        #bds-report-app .bds-modal-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:18px; }
+        #bds-report-app .bds-modal-heading h3 { color:#172b4d; font-size:20px; margin:0 0 5px; }
+        #bds-report-app .bds-modal-heading p { color:#64748b; font-size:13px; margin:0; }
+        #bds-report-app .bds-subject-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; align-items:end; gap:10px; padding:14px; border:1px solid #e3eaf3; border-radius:14px; background:#f7faff; }
+        #bds-report-app .bds-subject-form label { display:block; color:#42536d; font-size:12px; font-weight:700; margin-bottom:6px; }
+        #bds-report-app .bds-subject-form input { width:100%; min-height:42px; padding:10px 12px; border:1px solid #d6e0ed; border-radius:10px; font:inherit; }
+        #bds-report-app .bds-subject-list { display:grid; gap:8px; margin-top:16px; }
+        #bds-report-app .bds-subject-item { display:grid; grid-template-columns:minmax(0,1fr) 90px 82px auto; gap:10px; align-items:center; padding:11px 12px; border:1px solid #e8edf4; border-radius:12px; background:#fff; }
+        #bds-report-app .bds-subject-item strong { color:#203654; font-size:13px; overflow-wrap:anywhere; }
+        #bds-report-app .bds-subject-item small { color:#718096; font-size:11px; }
+        #bds-report-app .bds-subject-item input { width:100%; min-width:0; padding:8px; border:1px solid #dce4ee; border-radius:8px; }
+        #bds-report-app .bds-subject-item button { padding:8px 10px; font-size:12px; }
+        #bds-report-app .bds-status-pill { display:inline-flex; justify-content:center; padding:4px 8px; border-radius:30px; color:#16734b; background:#e8f7ef; font-size:10px; font-weight:800; }
+        #bds-report-app .bds-status-pill.inactive { color:#7c5b16; background:#fff4d7; }
+        #bds-report-app .bds-dashboard-insights { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 22px; }
+        #bds-report-app .bds-insight-card { min-width:0; padding:17px; border:1px solid #e6edf5; border-radius:16px; background:#fff; box-shadow:0 7px 20px rgba(21,51,88,.045); }
+        #bds-report-app .bds-insight-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 14px; color:#1d3454; font-weight:750; font-size:14px; }
+        #bds-report-app .bds-insight-subtitle { color:#8290a3; font-size:11px; font-weight:500; }
+        #bds-report-app .bds-grade-chart { display:grid; gap:9px; }
+        #bds-report-app .bds-grade-row { display:grid; grid-template-columns:28px minmax(0,1fr) 30px; align-items:center; gap:9px; color:#596b83; font-size:11px; }
+        #bds-report-app .bds-grade-track { height:9px; overflow:hidden; border-radius:20px; background:#edf2f7; }
+        #bds-report-app .bds-grade-fill { height:100%; width:0; border-radius:20px; background:linear-gradient(90deg,#3265a4,#2eb3bd); transition:width .65s cubic-bezier(.2,.75,.2,1); }
+        #bds-report-app .bds-class-list { display:grid; gap:10px; }
+        #bds-report-app .bds-class-item { display:flex; justify-content:space-between; gap:12px; color:#586b84; font-size:12px; }
+        #bds-report-app .bds-class-item strong { color:#203654; }
+        #bds-report-app .bds-performance-item { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 12px; align-items:center; color:#586b84; font-size:12px; }
+        #bds-report-app .bds-performance-item strong { color:#203654; }
+        #bds-report-app .bds-performance-track { grid-column:1 / -1; height:7px; overflow:hidden; border-radius:20px; background:#edf2f7; }
+        #bds-report-app .bds-performance-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#249a72,#35b7a2); transform-origin:left; animation:bds-bar-in .6s ease both; }
+        #bds-report-app .bds-empty-insight { color:#8895a7; padding:16px 0; font-size:12px; text-align:center; }
+        #bds-report-app .bds-support:focus-within, #bds-report-app .bds-contact-action:focus-visible { outline:3px solid rgba(41,120,185,.25); outline-offset:3px; }
+        #bds-report-app .bds-subject-toolbar .btn, #bds-report-app .bds-subject-item button { transition:transform .18s ease,box-shadow .18s ease; }
+        #bds-report-app .bds-subject-toolbar .btn:hover, #bds-report-app .bds-subject-item button:hover { transform:translateY(-2px); }
+        @keyframes bds-rise-in  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes bds-modal-in  { from { opacity:0; transform:translateY(8px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes bds-bar-in { from { transform:scaleX(.05); } to { transform:scaleX(1); } }
+        @media (max-width:1024px) {
+            #bds-report-app .bds-dashboard-insights { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+        @media (max-width:760px)  {
+            #bds-report-app .bds-support { grid-template-columns:1fr; padding:18px; gap:16px; }
+            #bds-report-app .bds-support-actions { justify-content:stretch; }
+            #bds-report-app .bds-contact-action { flex:1 1 100px; }
+            #bds-report-app .bds-dashboard-insights { grid-template-columns:1fr; }
+            #bds-report-app .bds-subject-form { grid-template-columns:1fr 110px; }
+            #bds-report-app .bds-subject-form button { grid-column:1 / -1; width:100%; }
+        }
+        @media (max-width:480px)  {
+            #bds-report-app .bds-subject-item { grid-template-columns:minmax(0,1fr) 74px; }
+            #bds-report-app .bds-subject-item .bds-subject-status { grid-column:1; }
+            #bds-report-app .bds-subject-item button { grid-column:2; grid-row:1 / span 2; }
+            #bds-report-app .bds-modal-content { padding:17px; }
+        }
+
+    #bds-report-app .bds-sync-state { padding:10px 14px; border-radius:10px; margin:12px 0; background:#eaf4ff; color:#183b5b; font-size:13px; border:1px solid #bad9f1; overflow-wrap:anywhere; }
+#bds-report-app .bds-sync-state[data-state="offline"] { background:#fff6e8; border-color:#efd3a7; color:#674818; }
+#bds-report-app .bds-sync-state[hidden] { display:none; }
+
+        /* BDS design system: dedicated components and accessible interaction. */
+        #bds-report-app { font-size:14px; }
+        #bds-report-app .bds-metrics-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; margin:0 0 23px; }
+        #bds-report-app .bds-metric { min-width:0; display:flex; flex-direction:column; gap:7px; padding:21px; border:1px solid transparent; border-radius:18px; box-shadow:0 8px 18px rgba(16,48,67,.06); color:white; }
+        #bds-report-app .bds-metric-primary { background:#173d56; }
+        #bds-report-app .bds-metric-teal { background:#227564; }
+        #bds-report-app .bds-metric-gold { background:#86613c; }
+        #bds-report-app .bds-metric-slate { background:#4b6179; }
+        #bds-report-app .bds-metric-light { grid-column:span 2; color:#173d56; background:#f8fbfc; border-color:#dce8eb; }
+        #bds-report-app .bds-metric-label { display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:700; font-size:13px; opacity:.96; }
+        #bds-report-app .bds-metric strong { display:block; font-size:clamp(28px,3vw,39px); letter-spacing:-.04em; line-height:1.2; font-variant-numeric:tabular-nums; }
+        #bds-report-app .bds-metric small { font-size:12px; opacity:.82; }
+        #bds-report-app .bds-metric-track { height:7px; background:#dce8ec; border-radius:9px; overflow:hidden; margin-top:9px; }
+        #bds-report-app .bds-metric-progress { width:0%; height:100%; border-radius:9px; background:#258b97; transition:width .3s ease; }
+        #bds-report-app .bds-metric-light small { display:flex; justify-content:space-between; gap:8px; }
+        #bds-report-app .bds-remove-subject { min-width:40px; min-height:40px; background:#fce9e8; color:#9c2831; border:1px solid #f2c9c9; border-radius:10px; cursor:pointer; font-weight:800; }
+        #bds-report-app .bds-remove-subject:hover { background:#f7d2d3; }
+        #bds-report-app .tab:hover:not(.active) { background:rgba(255,255,255,.65); color:#163f55; }
+        #bds-report-app .btn:hover:not(:disabled) { filter:brightness(1.07); box-shadow:0 8px 18px rgba(22,58,77,.14); transform:translateY(-1px); }
+        #bds-report-app :is(button,a,input,select,textarea):focus-visible { outline:3px solid #b67b23; outline-offset:3px; }
+        #bds-report-app :is(input,select,textarea) { min-width:0; font-family:inherit; color:#233b49; }
+        #bds-report-app :is(input,select,textarea):not([type="radio"]):not([type="checkbox"]) { max-width:100%; }
+        #bds-report-app .academic-row, #bds-report-app .form-grid, #bds-report-app .filter-row, #bds-report-app .signatures-grid { min-width:0; }
+        #bds-report-app .bds-support { background:linear-gradient(120deg,#fff 0%,#f5f9f7 100%); border-color:#dbe7e9; box-shadow:var(--shadow-sm); }
+        #bds-report-app .bds-insight-card { border-color:var(--bds-line); border-radius:18px; box-shadow:none; }
+        #bds-report-app .bds-modal-content { border-color:var(--bds-line); }
+        #bds-report-app .modal { padding:12px; overflow-y:auto; background:rgba(11,38,55,.67); }
+        #bds-report-app .modal-content { width:min(100%,560px); max-height:calc(100dvh - 32px); overflow:auto; margin:auto; }
+        #bds-report-app .modal-actions { flex-wrap:wrap; }
+        #bds-report-app .modal-btn { min-height:44px; }
+        #bds-report-app .bds-sync-state { border-radius:13px; }
+        #bds-report-app .search-results { max-width:100%; min-width:0; }
+        #bds-report-app .action-buttons { justify-content:flex-start; }
+        #bds-report-app .bds-subject-entry:hover td { background:#f8fbfc; }
+        #bds-report-app .bds-subject-entry td input { min-height:42px; }
+        #bds-report-app .report-preview { scrollbar-width:thin; }
+        @media (max-width:1020px) {
+            #bds-report-app .bds-metrics-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+            #bds-report-app .bds-metric-light { grid-column:span 1; }
+        }
+        @media (max-width:680px) {
+            body.bds-page { padding:10px; }
+            #bds-report-app .header { border-radius:18px; padding:29px 23px; }
+            #bds-report-app .card { border-radius:18px; padding:18px 15px; }
+            #bds-report-app .tabs { gap:5px; padding:5px; border-radius:14px; }
+            #bds-report-app .tab { min-height:48px; padding:9px 5px; font-size:13px; gap:5px; }
+            #bds-report-app .url-input-group { flex-direction:column; }
+            #bds-report-app .url-input-group input { width:100%; min-width:0; }
+            #bds-report-app .bds-metrics-grid { gap:9px; }
+            #bds-report-app .bds-metric { padding:15px; border-radius:14px; }
+            #bds-report-app .bds-metric strong { font-size:29px; }
+            #bds-report-app .bds-metric-label { font-size:12px; }
+            #bds-report-app .search-actions { flex-direction:row; width:100%; }
+            #bds-report-app .search-actions .btn { flex:1 1 125px; }
+            #bds-report-app .action-buttons .btn { flex:1 1 150px; }
+            #bds-report-app .filter-row { align-items:stretch; }
+            #bds-report-app .bds-mobile-table-hint { display:flex; }
+            #bds-report-app .table-container table { min-width:820px; }
+            #bds-report-app .modal-actions>* { flex:1 1 auto; }
+        }
+        @media (max-width:380px) {
+            #bds-report-app .bds-metrics-grid { grid-template-columns:1fr 1fr; }
+            #bds-report-app .bds-metric { padding:12px; }
+            #bds-report-app .bds-metric strong { font-size:26px; }
+            #bds-report-app .bds-metric small { font-size:11px; }
+            #bds-report-app .bds-support-copy { align-items:flex-start; }
+            #bds-report-app .bds-support-icon { width:43px; height:43px; }
+        }
+        @media (prefers-reduced-motion:reduce) {
+            #bds-report-app *, #bds-report-app *::before, #bds-report-app *::after { animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms; scroll-behavior:auto; }
+        }
+</style>
+</head>
+<body class="bds-page">
+    <div class="container" id="bds-report-app">
+        <!-- Header -->
+        <div class="header">
+            <h1>GGHS BENAZIR DISTRICT SCHOOL NAWABSHAH-1</h1>
+            <p>Under the Management of SZABIST Zab-ed</p>
+        </div>
+
+<!-- BDS professional support panel -->
+<section class="bds-support" aria-labelledby="bds-support-title">
+    <div class="bds-support-copy">
+        <div class="bds-support-icon" aria-hidden="true">✦</div>
+        <div>
+            <h2 id="bds-support-title">Need assistance with the system?</h2>
+            <p>Our support team is ready to help</p>
+        </div>
+    </div>
+    <div class="bds-support-actions" aria-label="Support contact options">
+        <a href="https://wa.me/923322991032" target="_blank" rel="noopener noreferrer" class="bds-contact-action bds-contact-whatsapp"><span aria-hidden="true">◉</span> WhatsApp</a>
+        <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=voiceatrights2013@gmail.com" target="_blank" rel="noopener noreferrer" class="bds-contact-action bds-contact-email"><span aria-hidden="true">✉</span> Gmail</a>
+        <a href="tel:+923023993489" class="bds-contact-action bds-contact-call"><span aria-hidden="true">☎</span> Call</a>
+    </div>
+</section>
+<!-- ============================================= -->
+
+
+        <!-- Apps Script URL Configuration -->
+        <div class="url-section">
+            <label class="url-label" for="appsScriptUrl">🔗 Google Apps Script URL</label>
+            <div class="url-input-group">
+                <input type="text" id="appsScriptUrl" onchange="bdsHandleEndpointChange()" placeholder="https://script.google.com/macros/s/.../exec" onblur="checkConnection()" value="">
+                <span id="connectionStatus" class="status-badge status-disconnected">🔴 Not Configured</span>
+            </div>
+        </div>
+
+        <div id="bdsSyncStatus" class="bds-sync-state" data-state="offline" role="status" aria-live="polite">Not synchronized. Select Fetch All to load current Google Sheets data.</div>
+        <div id="bdsEditingStale" class="bds-sync-state" data-state="offline" role="alert" hidden></div>
+
+        <!-- Edit Mode Indicator (Hidden by default) -->
+        <div id="editModeIndicator" class="edit-mode-indicator" style="display: none;">
+            <span>✏️ Editing Mode</span>
+            <span>Editing student with Roll No: <span id="editingRollNo"></span></span>
+            <button class="cancel-edit-btn" onclick="cancelEdit()">Cancel Edit</button>
+        </div>
+
+        <!-- Duplicate Warning Modal -->
+        <div id="duplicateModal" class="modal" role="dialog" aria-modal="true" aria-label="Duplicate roll number warning">
+            <div class="modal-content">
+                <h3>⚠️ Duplicate Roll Number Found!</h3>
+                <p>A student with roll number <strong id="dupRollNo"></strong> already exists.</p>
+                <p>Would you like to edit the existing record instead?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn cancel" onclick="closeDuplicateModal()">No, Cancel</button>
+                    <button class="modal-btn save" onclick="editDuplicateRecord()">Yes, Edit</button>
+                </div>
+            </div>
+        </div>
+
+
+<!-- Subject catalogue management -->
+<div id="subjectManagerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bds-subject-manager-title">
+    <div class="modal-content bds-modal-content">
+        <div class="bds-modal-heading">
+            <div><h3 id="bds-subject-manager-title">Subject Management</h3><p>Maintain the school's reusable subject catalogue.</p></div>
+            <button type="button" class="modal-btn cancel" onclick="closeSubjectManager()" aria-label="Close subject management">✕</button>
+        </div>
+        <form class="bds-subject-form" onsubmit="saveManagedSubject(event)">
+            <div><label for="managedSubjectName">Subject name</label><input id="managedSubjectName" maxlength="80" placeholder="e.g. Biology" required></div>
+            <div><label for="managedSubjectMarks">Default marks</label><input id="managedSubjectMarks" type="number" min="1" step="0.01" value="100" required></div>
+            <button type="submit" class="btn btn-primary" id="managedSubjectSave">Add Subject</button>
+        </form>
+        <input type="hidden" id="managedSubjectId" value="">
+        <div id="managedSubjectsList" class="bds-subject-list" aria-live="polite"><div class="bds-empty-insight">Loading subjects...</div></div>
+        <div class="modal-actions" style="margin-top:18px"><button class="modal-btn cancel" type="button" onclick="closeSubjectManager()">Done</button></div>
+    </div>
+</div>
+
+<!-- Export Options Modal -->
+<div id="exportModal" class="modal" role="dialog" aria-modal="true" aria-label="Export options">
+    <div class="modal-content" style="max-width: 400px;">
+        <h3>📥 Export Options</h3>
+        <p>Choose what you want to export:</p>
+        
+        <div style="margin: 20px 0;">
+            <label style="display: block; margin: 10px 0;">
+                <input type="radio" name="exportType" value="current" checked> 
+                <strong>Current View</strong> - Export only what's shown in the table
+            </label>
+            <label style="display: block; margin: 10px 0;">
+                <input type="radio" name="exportType" value="filtered"> 
+                <strong>Filtered Results</strong> - Export all students matching current filters
+            </label>
+            <label style="display: block; margin: 10px 0;">
+                <input type="radio" name="exportType" value="all"> 
+                <strong>All Data</strong> - Export EVERYTHING (all columns)
+            </label>
+            <label style="display: block; margin: 10px 0;">
+                <input type="radio" name="exportType" value="summary"> 
+                <strong>Summary Report</strong> - Export statistics only
+            </label>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeExportModal()">Cancel</button>
+            <button class="modal-btn save" onclick="handleExport()" style="background: #28a745;">Export</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Export Disabled Modal -->
+<div id="exportDisabledModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bds-export-disabled-title">
+    <div class="modal-content bds-modal-content" style="max-width: 450px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+        <h3 id="bds-export-disabled-title" style="color: var(--primary); margin-bottom: 20px;">Export Feature Disabled</h3>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <p style="margin-bottom: 15px; font-size: 16px;">
+                To enable this export feature, please contact:
+            </p>
+            <p style="font-size: 20px; font-weight: bold; color: var(--primary); margin-bottom: 10px;">
+                Muhammad Nadeem
+            </p>
+            <p style="font-size: 24px; font-weight: bold; color: #25D366; margin-bottom: 5px;">
+                +92 332 2991032
+            </p>
+            <p style="font-size: 14px; color: #666;">
+                Available via WhatsApp
+            </p>
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <a href="https://wa.me/923322991032" target="_blank" class="btn btn-success" style="text-decoration: none; min-width: 150px; background: #25D366;">
+                📱 WhatsApp
+            </a>
+            <button class="modal-btn cancel" onclick="closeExportDisabledModal()" style="min-width: 100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" aria-label="Report card workspace">
+            <button type="button" class="tab active" role="tab" aria-controls="tab-input" aria-selected="true" onclick="showTab('input')">
+                <span>➕</span> <span>Add</span>
+            </button>
+            <button type="button" class="tab" role="tab" aria-controls="tab-search" aria-selected="false" onclick="showTab('search')">
+                <span>🔍</span> <span>Search</span>
+            </button>
+            <button type="button" class="tab" role="tab" aria-controls="tab-preview" aria-selected="false" onclick="showTab('preview')">
+                <span>👁️</span> <span>Preview</span>
+            </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="spinner" role="status" aria-label="Loading"></div>
+        
+        <!-- Message Box -->
+        <div id="messageBox" class="message" role="status" aria-live="polite"></div>
+
+        <!-- INPUT TAB -->
+        <div id="tab-input" class="tab-content active" role="tabpanel">
+            <!-- Student Information -->
+            <div class="card">
+                <h2>📝 Student Information</h2>
+                
+                <!-- Academic Session, Report Term, Working Days Term fields -->
+                <div class="academic-row">
+                    <div class="academic-field">
+                        <label for="academicSession">Academic Session</label>
+                        <input type="text" id="academicSession" value="2025-26" placeholder="e.g., 2025-26">
+                        <span class="hint">e.g., 2025-26</span>
+                    </div>
+                    <div class="academic-field">
+                        <label for="reportTerm">Report Term</label>
+                        <input type="text" id="reportTerm" value="1st Term" placeholder="e.g., 1st Term">
+                        <span class="hint">Appears in report title</span>
+                    </div>
+                    <div class="academic-field">
+                        <label for="workingDaysTerm">Working Days Term</label>
+                        <input type="text" id="workingDaysTerm" value="1st Term" placeholder="e.g., 1st Term">
+                        <span class="hint">Appears in Total Working Days label</span>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="studentName">Student Name <span class="required">*</span></label>
+                        <input type="text" id="studentName" placeholder="Enter student name" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="fatherName">Father's Name <span class="required">*</span></label>
+                        <input type="text" id="fatherName" placeholder="Enter father's name" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="studentClass">Class/Section <span class="required">*</span></label>
+                        <input type="text" id="studentClass" placeholder="e.g., VII-A" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="rollNumber">Roll Number <span class="required">*</span></label>
+       <input type="text" id="rollNumber" placeholder="Enter roll number" value="" 
+       oninput="debounceCheck()" 
+       onchange="checkDuplicateRollNo()"
+       > 
+                    </div>
+                    <div class="form-group">
+                        <label for="daysAttended">Days Attended</label>
+                        <input type="number" id="daysAttended" placeholder="Days attended" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="totalWorkingDays">Total Working Days</label>
+                        <input type="number" id="totalWorkingDays" placeholder="Total working days" value="90">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subjects Table -->
+            <div class="card">
+                <h2>📊 Subject Scores</h2>
+                <div class="bds-subject-toolbar">
+                    <button class="btn btn-success" type="button" onclick="addSubjectRow()">➕ Add Subject</button>
+                    <button class="btn bds-manage-subjects" type="button" onclick="openSubjectManager()">⚙ Manage Subjects</button>
+                </div>
+                <p class="bds-subject-hint">Add assessment rows for this student, or manage the school's reusable subject catalogue.</p>
+                <p class="bds-mobile-table-hint" aria-label="Mobile table navigation">↔ Swipe horizontally to view all subject fields</p>
+                <div class="table-container">
+                    <table id="subjectsTable">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Total</th>
+                                <th>Obtained</th>
+                                <th>%</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                                <th>Sign</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsBody">
+                            <!-- Subjects will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Comments & Signatures -->
+            <div class="card">
+                <h2>💬 Comments & Signatures</h2>
+                <div class="form-group">
+                    <label for="teacherComments">Class Teacher's Comments</label>
+                    <textarea id="teacherComments" rows="3"></textarea>
+                </div>
+                <div class="signatures-grid">
+                    <div class="signature-field">
+                        <label for="classTeacherSign">Class Teacher</label>
+                        <input type="text" id="classTeacherSign" placeholder="Signature">
+                    </div>
+                    <div class="signature-field">
+                        <label for="adminSign">Admin</label>
+                        <input type="text" id="adminSign" placeholder="Signature">
+                    </div>
+                    <div class="signature-field">
+                        <label for="headMistressSign">Head Mistress</label>
+                        <input type="text" id="headMistressSign" placeholder="Signature">
+                    </div>
+                    <div class="signature-field">
+                        <label for="parentSign">Parent</label>
+                        <input type="text" id="parentSign" placeholder="Signature">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" id="btnSave" class="btn btn-primary" onclick="saveOrUpdate()">💾 Save to Sheet</button>
+                <button type="button" id="btnPrint" class="btn btn-success" onclick="printReportCard()">🖨️ Print PDF</button>
+                <button type="button" id="btnClear" class="btn btn-warning" onclick="clearForm()">🔄 Clear</button>
+            </div>
+        </div>
+
+        <!-- SEARCH TAB -->
+        <div id="tab-search" class="tab-content" role="tabpanel">
+            <div class="card">
+                <div class="search-header">
+                    <h2>🔍 Search Student Records</h2>
+                    <div class="search-actions">
+                        <button class="btn btn-info" onclick="fetchAllStudents()" style="min-width: auto;">📋 Fetch All</button>
+                        <button class="btn btn-success" onclick="showExportOptions()" style="min-width: auto; padding: 10px 20px;">📥 Export</button>
+                    </div>
+                </div>
+
+
+<!-- Academic dashboard summary -->
+                <div class="bds-metrics-grid" aria-label="Academic summary metrics">
+                    <article class="bds-metric bds-metric-primary"><span class="bds-metric-label">Total Students <span aria-hidden="true">👥</span></span><strong id="totalStudentsCount">0</strong><small>Enrolled students</small></article>
+                    <article class="bds-metric bds-metric-teal"><span class="bds-metric-label">Active Classes <span aria-hidden="true">📚</span></span><strong id="totalClassesCount">0</strong><small>Sections running</small></article>
+                    <article class="bds-metric bds-metric-gold"><span class="bds-metric-label">Pass Rate <span aria-hidden="true">📊</span></span><strong id="passRate">0%</strong><small>50% or higher</small></article>
+                    <article class="bds-metric bds-metric-slate"><span class="bds-metric-label">Top Grade <span aria-hidden="true">🏆</span></span><strong id="topGrade">-</strong><small>Highest achieved</small></article>
+                    <article class="bds-metric bds-metric-light"><span class="bds-metric-label">Average Score <span aria-hidden="true">📈</span></span><strong id="avgScore">0%</strong><div class="bds-metric-track"><div id="avgScoreBar" class="bds-metric-progress"></div></div></article>
+                    <article class="bds-metric bds-metric-light"><span class="bds-metric-label">Completion Rate <span aria-hidden="true">✓</span></span><strong id="completionRate">0%</strong><small>With Marks <span id="completionDetail">0/0</span></small></article>
+                </div>
+
+        <div class="bds-dashboard-insights" aria-label="Academic performance insights">
+            <section class="bds-insight-card">
+                <h3 class="bds-insight-title">Grade distribution <span class="bds-insight-subtitle">Students with assessed marks</span></h3>
+                <div id="bdsGradeChart" class="bds-grade-chart"><div class="bds-empty-insight">Fetch student records to view grade distribution.</div></div>
+            </section>
+            <section class="bds-insight-card">
+                <h3 class="bds-insight-title">Class performance <span class="bds-insight-subtitle">Average and pass rate</span></h3>
+                <div id="bdsClassOverview" class="bds-class-list"><div class="bds-empty-insight">Class insights will appear when records are loaded.</div></div>
+            </section>
+            <section class="bds-insight-card">
+                <h3 class="bds-insight-title">Subject performance <span class="bds-insight-subtitle">Weighted result across assessed students</span></h3>
+                <div id="bdsSubjectPerformance" class="bds-class-list"><div class="bds-empty-insight">Subject insights will appear when records are loaded.</div></div>
+            </section>
+        </div>
+
+                
+                <!-- Class Filter Row -->
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="gradeFilter">Grade</label>
+                        <select id="gradeFilter" onchange="updateSectionOptions(); applyFilters();">
+                            <option value="all">All Grades</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="sectionFilter">Section</label>
+                        <select id="sectionFilter" onchange="applyFilters()">
+                            <option value="all">All Sections</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchRollNo">Roll Number (optional)</label>
+                        <input type="text" id="searchRollNo" placeholder="Enter roll number">
+                    </div>
+                    <div class="search-actions" style="align-items: flex-end;">
+                        <button class="btn btn-primary" onclick="applyFilters()" style="min-width: auto;">🔍 Search</button>
+                        <button class="btn btn-secondary" onclick="clearSearchResults()" style="min-width: auto; padding: 10px 20px;">🗑️ Clear</button>
+                        </div>
+                </div>
+
+                <!-- Active Filters Display -->
+                <div id="activeFilters" class="active-filters" style="display: none;"></div>
+
+                <div id="searchResults" class="search-results">
+                    <div class="message info">Select filters and click Search or Fetch All to load records</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW TAB -->
+        <div id="tab-preview" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h2>👁️ Report Preview</h2>
+                <div id="reportPreview" class="report-preview"></div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="printReportCard()">🖨️ Print PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // DEFAULT SUBJECTS - Updated with new subject names
+        // =============================================
+        const defaultSubjects = [
+            { name: 'English', totalMarks: 100 },
+            { name: 'Urdu', totalMarks: 100 },
+            { name: 'Maths', totalMarks: 100 },
+            { name: 'Science', totalMarks: 100 },
+            { name: 'S. Studies', totalMarks: 50 },
+            { name: 'Islamiyat', totalMarks: 50 },
+            { name: 'Sindhi', totalMarks: 50 },
+            { name: 'Computer', totalMarks: 50 },
+            { name: 'Stemp21', totalMarks: 50 },
+            { name: 'Physics', totalMarks: 100 },
+            { name: 'Chemistry', totalMarks: 100 }
+        ];
+        let bdsCatalogueLoaded = false;
+        let subjectCatalogue = defaultSubjects.map((subject, index) => ({
+            subjectId: 'LOCAL-' + (index + 1), name: subject.name,
+            defaultTotalMarks: subject.totalMarks, status: 'Active', displayOrder: index + 1
+        }));
+
+        // One grade policy across input preview, dashboard, print and dormant exports.
+        // Raw (not rounded) percentage decides the grade.
+        const BDS_GRADE_ORDER = Object.freeze(['A+', 'A', 'B+', 'B', 'C', 'D', 'F']);
+        function bdsGradeForPercentage(value) {
+            const p = Number(value);
+            if (!Number.isFinite(p) || p < 0 || p > 100) return '-';
+            if (p >= 90) return 'A+';
+            if (p >= 80) return 'A';
+            if (p >= 70) return 'B+';
+            if (p >= 60) return 'B';
+            if (p >= 55) return 'C';
+            if (p >= 50) return 'D';
+            return 'F';
+        }
+        function bdsSubjectCalculation(total, marksValue) {
+            const marks = marksValue == null ? '' : String(marksValue).trim();
+            if (!marks) return { percentage: '', grade: '-', assessed: false };
+            if (marks.toUpperCase() === 'A') return { percentage: 'A', grade: '-', assessed: true };
+            const maximum = Number(total), obtained = Number(marks);
+            if (!Number.isFinite(maximum) || maximum <= 0 || !Number.isFinite(obtained) || obtained < 0 || obtained > maximum)
+                return { percentage: '', grade: '-', assessed: false, invalid: true };
+            const percent = obtained / maximum * 100;
+            return { percentage: Number(percent.toFixed(2)), grade: bdsGradeForPercentage(percent), assessed: true };
+        }
+
+        // Per-deployment cache. Never import prior database records implicitly.
+        const BDS_CACHE_PREFIX = 'bds_report_v206_';
+        function bdsCacheKey(type = 'students') {
+            const url = document.getElementById('appsScriptUrl').value.trim();
+            if (!url) return BDS_CACHE_PREFIX + 'unconfigured_' + type;
+            let hash = 2166136261;
+            for (let i = 0; i < url.length; i++) {
+                hash ^= url.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return BDS_CACHE_PREFIX + (hash >>> 0).toString(36) + '_' + type;
+        }
+        function bdsReadCache(type) {
+            try { const data = JSON.parse(localStorage.getItem(bdsCacheKey(type)) || 'null');
+                return data && Array.isArray(data.records) ? data : null;
+            } catch (_) { return null; }
+        }
+        function bdsWriteCache(type, records) {
+            try { localStorage.setItem(bdsCacheKey(type), JSON.stringify({ records, fetchedAt: new Date().toISOString() })); }
+            catch (error) { console.warn('BDS cache unavailable:', error.message); }
+        }
+        let bdsAuthoritativeStudents = [];
+        let bdsLastServerSync = '';
+        let bdsIsOffline = true;
+        function bdsSyncStatus(message, offline) {
+            const status = document.getElementById('bdsSyncStatus');
+            if (!status) return;
+            status.textContent = message;
+            status.dataset.state = offline ? 'offline' : 'synced';
+        }
+        function bdsUseStudents(students, serverFresh, fetchedAt) {
+            bdsAuthoritativeStudents = students;
+            bdsIsOffline = !serverFresh;
+            if (serverFresh) {
+                bdsLastServerSync = fetchedAt || new Date().toISOString();
+                bdsWriteCache('students', students);
+                bdsSyncStatus('Synced with Google Sheets: ' + new Date(bdsLastServerSync).toLocaleString(), false);
+            } else {
+                bdsSyncStatus('Offline cached data, saved ' + (fetchedAt ? new Date(fetchedAt).toLocaleString() : 'previously') + '. Fetch All to refresh.', true);
+            }
+            populateClassFilters(students);
+            displayStudentRecords(students);
+            updateDashboardMetrics();
+        }
+        function bdsHandleEndpointChange() {
+            if (isEditMode) cancelEdit();
+            bdsAuthoritativeStudents = [];
+            allStudents = [];
+            subjectCatalogue = [];
+            bdsCatalogueLoaded = false;
+            bdsIsOffline = true;
+            bdsRestoreOfflineData();
+            if (!bdsAuthoritativeStudents.length) { displayStudentRecords([]); updateDashboardMetrics(); }
+            if (isEditMode) bdsWarningForOpenEdit([]);
+            loadSubjectCatalogue().then(() => { if (!isEditMode) loadSubjects(); });
+        }
+        function bdsRestoreOfflineData() {
+            const cached = bdsReadCache('students');
+            if (cached) bdsUseStudents(cached.records, false, cached.fetchedAt);
+            else bdsSyncStatus('Not synchronized. Select Fetch All to load current Google Sheets data.', true);
+        }
+        function bdsWarningForOpenEdit(students) {
+            if (!isEditMode || !editingStudentData) return;
+            const fresh = students.find(student => student.recordId === editingStudentData.recordId);
+            if (!fresh || fresh.recordVersion !== editingStudentData.recordVersion) {
+                const notice = document.getElementById('bdsEditingStale');
+                if (notice) { notice.hidden = false; notice.textContent = 'This student changed in Google Sheets. Your open form was not replaced. Review the latest record before updating.'; }
+            }
+        }
+        // Historic caches remain isolated by the deployment-specific namespace.
+
+        // =============================================
+        // GRADE SORTING ORDER
+        // =============================================
+        const gradeOrder = {
+            'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 
+            'VIII': 8, 'IX': 9, 'X': 10, 'XI': 11, 'XII': 12
+        };
+
+        // =============================================
+        // EDIT MODE VARIABLES
+        // =============================================
+        let isEditMode = false;
+        let editingStudentTimestamp = null;
+        let editingStudentData = null;
+        const bdsExplicitSubjectRemovals = new Set();
+        let latestRequestID = 0;
+        let debounceTimer;
+        let activeCheck = null;
+        // EXPORT FEATURE TOGGLE - Change this to false to disable export
+        const EXPORT_ENABLED = false;  // Set to false to block export, true to enable
+        let currentPage = 1;
+        let itemsPerPage = 25;
+        let allStudents = [];
+
+
+        // =============================================
+// DEBOUNCE FUNCTION - FIXED VERSION
+// =============================================
+function debounceCheck() {
+    console.log("🔵 debounceCheck triggered"); // Debug log
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        console.log("🟢 Calling checkDuplicateRollNo after debounce");
+        checkDuplicateRollNo();
+    }, 500);
+}
+
+        // =============================================
+        // INITIALIZATION
+        // =============================================
+        window.onload = async function() {
+            initializeStorage();
+            bdsRestoreOfflineData();
+            await loadSubjectCatalogue();
+            loadSubjects();
+            await checkConnection();
+            showPreview();
+            updateDashboardMetrics();
+            console.log('BDS Report Card System initialized');
+        };
+
+        function initializeStorage() {
+            // Cache is optional and scoped to the current Apps Script deployment.
+        }
+
+        function escapeHTML(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[character]));
+        }
+
+        function jsonpRequest(params, timeoutMs = 15000) {
+            const baseUrl = document.getElementById('appsScriptUrl').value.trim();
+            if (!baseUrl) return Promise.reject(new Error('Enter your Google Apps Script URL first.'));
+            return new Promise((resolve, reject) => {
+                const callbackName = 'bds_jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+                const query = new URLSearchParams({ ...params, callback: callbackName }).toString();
+                const script = document.createElement('script');
+                let settled = false;
+                const cleanup = () => {
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                    try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+                };
+                const timeout = setTimeout(() => {
+                    if (settled) return;
+                    settled = true; cleanup(); reject(new Error('The Apps Script request timed out.'));
+                }, timeoutMs);
+                window[callbackName] = result => {
+                    if (settled) return;
+                    settled = true; clearTimeout(timeout); cleanup();
+                    if (result && result.success === false && !result.pending) reject(new Error(result.error || 'The Apps Script request failed.'));
+                    else resolve(result || {});
+                };
+                script.onerror = () => {
+                    if (settled) return;
+                    settled = true; clearTimeout(timeout); cleanup(); reject(new Error('Could not reach the Apps Script endpoint.'));
+                };
+                script.src = baseUrl + (baseUrl.includes('?') ? '&' : '?') + query;
+                document.body.appendChild(script);
+            });
+        }
+
+        let bdsPendingWrite = null;
+        async function apiPost(payload) {
+            const baseUrl = document.getElementById('appsScriptUrl').value.trim();
+            if (!baseUrl) throw new Error('Enter your Google Apps Script URL first.');
+            const payloadText = JSON.stringify(payload);
+            if (bdsPendingWrite && (bdsPendingWrite.url !== baseUrl || bdsPendingWrite.payloadText !== payloadText)) {
+                throw new Error('An earlier save has an unknown outcome. Check its status before submitting a different operation.');
+            }
+            if (!bdsPendingWrite) {
+                const requestId = 'bds-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2, 12));
+                bdsPendingWrite = { url: baseUrl, requestId, payloadText, transmitted: false };
+            }
+            const pending = bdsPendingWrite;
+            try {
+                if (!pending.transmitted) {
+                    // No-cors responses are opaque. The same request ID is retained if outcome is unknown.
+                    pending.transmitted = true;
+                    await fetch(baseUrl, { method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                        body: JSON.stringify({ ...payload, requestId: pending.requestId }) });
+                }
+                const startedAt = Date.now();
+                while (Date.now() - startedAt < 30000) {
+                    await new Promise(resolve => setTimeout(resolve, 900));
+                    const status = await jsonpRequest({ action: 'getOperationStatus', requestId: pending.requestId }, 10000);
+                    if (status && status.pending) continue;
+                    if (!status || status.success !== true) {
+                        bdsPendingWrite = null;
+                        throw new Error((status && status.error) || 'The server rejected the operation.');
+                    }
+                    bdsPendingWrite = null;
+                    return status;
+                }
+                throw new Error('Save outcome is still unknown. Retry Save to check the same request ID, or refresh the page only after verifying the record.');
+            } catch (error) {
+                if (!/unknown|uncertain|network|fetch|timeout/i.test(error.message)) {
+                    // Known server rejections may be safely replaced with a revised operation.
+                    bdsPendingWrite = null;
+                }
+                throw error;
+            }
+        }
+
+        async function loadSubjectCatalogue() {
+            try {
+                const result = await jsonpRequest({ action: 'getSubjects', includeInactive: '1' });
+                if (result && Array.isArray(result.subjects)) {
+                    subjectCatalogue = result.subjects;
+                    bdsCatalogueLoaded = true;
+                    bdsWriteCache('catalogue', subjectCatalogue);
+                }
+            } catch (error) {
+                try {
+                    const cached = bdsReadCache('catalogue');
+                    if (cached) { subjectCatalogue = cached.records; bdsCatalogueLoaded = true; }
+                } catch (_) {}
+                console.warn('Subject catalogue could not be refreshed:', error.message);
+            }
+        }
+
+        function loadSubjects() {
+            const tbody = document.getElementById('subjectsBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const activeSubjects = subjectCatalogue.filter(subject => subject.status !== 'Inactive');
+            const subjectsToLoad = bdsCatalogueLoaded ? activeSubjects : (subjectCatalogue.length ? activeSubjects : defaultSubjects);
+            subjectsToLoad.forEach(subject => addSubjectRow(subject.name, subject.defaultTotalMarks || subject.totalMarks || 100, '', '', '', subject.subjectId || ''));
+        }
+
+        function addSubjectRow(name = '', totalMarks = 100, obtained = '', remarks = '', signature = '', subjectId = '') {
+            if (subjectId) bdsExplicitSubjectRemovals.delete(subjectId);
+            const tbody = document.getElementById('subjectsBody');
+            const row = tbody.insertRow();
+            row.dataset.subjectId = subjectId || '';
+            row.className = 'bds-subject-entry';
+            row.innerHTML = `
+                <td><input type="text" aria-label="Subject name" value="${escapeHTML(name)}" onchange="updateRow(this)"></td>
+                <td><input type="number" min="1" step="0.01" aria-label="Total marks" value="${escapeHTML(totalMarks)}" onchange="updateRow(this)"></td>
+                <td><input type="text" aria-label="Marks obtained" value="${escapeHTML(obtained)}" onchange="updateRow(this)" placeholder="Marks or A"></td>
+                <td class="percentage-display">-</td>
+                <td class="grade-display">-</td>
+                <td><input type="text" aria-label="Remarks" value="${escapeHTML(remarks)}" placeholder="Remarks" onchange="updateRow(this)"></td>
+                <td><input type="text" aria-label="Teacher signature" value="${escapeHTML(signature)}" placeholder="Signature" onchange="updateRow(this)"></td>
+                <td><button type="button" aria-label="Remove subject row" onclick="removeSubjectResultRow(this)" class="bds-remove-subject">✕</button></td>
+            `;
+            if (obtained !== '') updateRow(row.cells[2].querySelector('input'));
+            return row;
+        }
+
+        async function openSubjectManager() {
+            document.getElementById('subjectManagerModal').classList.add('active');
+            resetManagedSubjectForm();
+            document.getElementById('managedSubjectsList').innerHTML = '<div class="bds-empty-insight">Refreshing subject catalogue...</div>';
+            await loadSubjectCatalogue();
+            renderSubjectManager();
+        }
+
+        function closeSubjectManager() {
+            document.getElementById('subjectManagerModal').classList.remove('active');
+            resetManagedSubjectForm();
+        }
+
+        function resetManagedSubjectForm() {
+            document.getElementById('managedSubjectId').value = '';
+            document.getElementById('managedSubjectName').value = '';
+            document.getElementById('managedSubjectMarks').value = '100';
+            document.getElementById('managedSubjectSave').textContent = 'Add Subject';
+        }
+
+        function renderSubjectManager() {
+            const list = document.getElementById('managedSubjectsList');
+            if (!subjectCatalogue.length) {
+                list.innerHTML = '<div class="bds-empty-insight">No subjects are available. Check the Apps Script connection.</div>';
+                return;
+            }
+            list.innerHTML = subjectCatalogue.map((subject, subjectIndex) => `
+                <div class="bds-subject-item">
+                    <div><strong>${escapeHTML(subject.name)}</strong><br><small>${escapeHTML(subject.subjectId)}</small></div>
+                    <div><small>Default: <strong>${escapeHTML(subject.defaultTotalMarks)}</strong> marks</small></div>
+                    <div class="bds-subject-status"><span class="bds-status-pill ${subject.status === 'Inactive' ? 'inactive' : ''}">${subject.status === 'Inactive' ? 'Inactive' : 'Active'}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-secondary" onclick="editManagedSubjectByIndex(${subjectIndex})">Edit</button><button type="button" class="btn ${subject.status === 'Inactive' ? 'btn-success' : 'btn-warning'}" onclick="toggleManagedSubjectByIndex(${subjectIndex})">${subject.status === 'Inactive' ? 'Activate' : 'Deactivate'}</button></div>
+                </div>`).join('');
+        }
+
+        function editManagedSubjectByIndex(index) {
+            const subject = subjectCatalogue[index];
+            if (subject) editManagedSubject(subject.subjectId);
+        }
+
+        function toggleManagedSubjectByIndex(index) {
+            const subject = subjectCatalogue[index];
+            if (subject) toggleManagedSubject(subject.subjectId);
+        }
+
+        function editManagedSubject(subjectId) {
+            const subject = subjectCatalogue.find(item => item.subjectId === subjectId);
+            if (!subject) return;
+            document.getElementById('managedSubjectId').value = subject.subjectId;
+            document.getElementById('managedSubjectName').value = subject.name;
+            document.getElementById('managedSubjectMarks').value = subject.defaultTotalMarks || 100;
+            document.getElementById('managedSubjectSave').textContent = 'Save Changes';
+            document.getElementById('managedSubjectName').focus();
+        }
+
+        async function saveManagedSubject(event) {
+            event.preventDefault();
+            const button = document.getElementById('managedSubjectSave');
+            const subjectId = document.getElementById('managedSubjectId').value;
+            const name = document.getElementById('managedSubjectName').value.trim();
+            const defaultTotalMarks = Number(document.getElementById('managedSubjectMarks').value);
+            if (!name || !Number.isFinite(defaultTotalMarks) || defaultTotalMarks <= 0) {
+                showMessage('Enter a subject name and valid default marks.', 'error'); return;
+            }
+            button.disabled = true;
+            try {
+                const existingSubject = subjectId ? subjectCatalogue.find(item => item.subjectId === subjectId) : null;
+                const status = existingSubject ? existingSubject.status : 'Active';
+                await apiPost({ action: 'saveSubject', subject: { subjectId, name, defaultTotalMarks, status, recordVersion: existingSubject ? existingSubject.recordVersion : '' } });
+                await loadSubjectCatalogue();
+                if (existingSubject) {
+                    Array.from(document.getElementById('subjectsBody').rows).forEach(row => {
+                        if (row.dataset.subjectId !== subjectId) return;
+                        const inputs = row.getElementsByTagName('input');
+                        if (inputs[0]) inputs[0].value = name;
+                        if (inputs[1] && Number(inputs[1].value) === Number(existingSubject.defaultTotalMarks)) {
+                            inputs[1].value = defaultTotalMarks;
+                        }
+                        if (inputs[2]) updateRow(inputs[2]);
+                    });
+                }
+                renderSubjectManager(); resetManagedSubjectForm();
+                const savedSubject = subjectCatalogue.find(item => item.name.toLowerCase() === name.toLowerCase());
+                const existingRow = Array.from(document.getElementById('subjectsBody').rows).find(row => row.cells[0].querySelector('input')?.value.trim().toLowerCase() === name.toLowerCase());
+                if (savedSubject && !existingRow && !isEditMode) addSubjectRow(savedSubject.name, savedSubject.defaultTotalMarks, '', '', '', savedSubject.subjectId);
+                showMessage('Subject saved successfully.', 'success');
+            } catch (error) {
+                showMessage('Subject was not saved: ' + error.message, 'error');
+            } finally { button.disabled = false; }
+        }
+
+        async function toggleManagedSubject(subjectId) {
+            const subject = subjectCatalogue.find(item => item.subjectId === subjectId);
+            if (!subject) return;
+            const nextStatus = subject.status === 'Inactive' ? 'Active' : 'Inactive';
+            try {
+                await apiPost({ action: 'saveSubject', subject: { ...subject, status: nextStatus, recordVersion: subject.recordVersion } });
+                await loadSubjectCatalogue(); renderSubjectManager();
+                showMessage(subject.name + ' is now ' + nextStatus.toLowerCase() + '.', 'success');
+            } catch (error) { showMessage('Could not update subject: ' + error.message, 'error'); }
+        }
+
+        function updateRow(input) {
+            const row = input.closest('tr');
+            const inputs = row.getElementsByTagName('input');
+            const result = bdsSubjectCalculation(inputs[1].value, inputs[2].value);
+            row.cells[3].textContent = result.percentage === '' ? '-' : String(result.percentage);
+            row.cells[4].textContent = result.grade;
+        }
+
+        // =============================================
+        // CHECK CONNECTION
+        // =============================================
+        async function checkConnection() {
+            const url = document.getElementById('appsScriptUrl').value.trim();
+            const statusEl = document.getElementById('connectionStatus');
+            if (!url) {
+                statusEl.textContent = 'Not Configured';
+                statusEl.className = 'status-badge status-disconnected';
+                return false;
+            }
+            statusEl.textContent = 'Checking...';
+            statusEl.className = 'status-badge status-disconnected';
+            try {
+                const result = await jsonpRequest({ action: 'ping' }, 10000);
+                if (!result || result.success !== true) throw new Error('API did not confirm availability.');
+                statusEl.textContent = 'Connected v' + (result.version || '');
+                statusEl.className = 'status-badge status-connected';
+                return true;
+            } catch (error) {
+                statusEl.textContent = 'Connection Failed';
+                statusEl.className = 'status-badge status-disconnected';
+                return false;
+            }
+        }
+
+        // =============================================
+        // DUPLICATE CHECK FUNCTIONS
+        // =============================================
+        let pendingDuplicateData = null;
+
+        function showDuplicateModal(rollNo, studentData) {
+            document.getElementById('dupRollNo').textContent = rollNo;
+            pendingDuplicateData = studentData;
+            document.getElementById('duplicateModal').classList.add('active');
+        }
+
+        // =============================================
+// CLOSE MODAL FUNCTION - Simplified
+// =============================================
+function closeDuplicateModal() {
+    document.getElementById('duplicateModal').classList.remove('active');
+    pendingDuplicateData = null;
+    document.getElementById('rollNumber').focus();
+    // Don't call checkDuplicateRollNo here anymore - let oninput/onchange handle it
+}
+
+        function editDuplicateRecord() {
+            const studentToEdit = pendingDuplicateData;
+            document.getElementById('duplicateModal').classList.remove('active');
+            pendingDuplicateData = null;
+            if (!studentToEdit) return;
+            loadStudentData(studentToEdit);
+            isEditMode = true;
+            editingStudentTimestamp = studentToEdit.timestamp;
+            editingStudentData = studentToEdit;
+            document.getElementById('editModeIndicator').style.display = 'flex';
+            document.getElementById('editingRollNo').textContent = studentToEdit.rollNumber;
+            const btnSave = document.getElementById('btnSave');
+            btnSave.innerHTML = '✏️ Update Record';
+            btnSave.style.background = 'linear-gradient(135deg, #ffc107, #fd7e14)';
+        }
+
+        // =============================================
+        // DUPLICATE CHECK FUNCTION
+        // =============================================
+
+        async function checkDuplicateRollNumber(rollNumber) {
+            const url = document.getElementById('appsScriptUrl').value.trim();
+            if (!url || !String(rollNumber || '').trim()) return { isDuplicate: false };
+            try {
+                return await jsonpRequest({
+                    action: 'checkDuplicate', rollNo: String(rollNumber).trim(),
+                    recordId: isEditMode && editingStudentData ? (editingStudentData.recordId || '') : '',
+                    currentTimestamp: isEditMode ? (editingStudentTimestamp || '') : ''
+                });
+            } catch (error) {
+                throw new Error('Duplicate check could not be completed: ' + error.message);
+            }
+        }
+
+        // =============================================
+        // SAVE OR UPDATE FUNCTIONS - UPDATED for new column structure
+        // =============================================
+
+// BUTTON LOADING STATES 
+// =============================================
+
+// Show loading state on button
+function setButtonLoading(button, isLoading, isEditMode = false) {
+    if (!button) return;
+    
+    if (isLoading) {
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        // Store original text to restore later
+        button.dataset.originalText = button.innerHTML;
+        button.dataset.originalBg = button.style.background;
+    } else {
+        button.disabled = false;
+        button.classList.remove('btn-loading');
+        // Restore original text and style
+        if (button.dataset.originalText) {
+            button.innerHTML = button.dataset.originalText;
+        } else {
+            button.innerHTML = isEditMode ? "✏️ Update Record" : "💾 Save to Sheet";
+        }
+        if (button.dataset.originalBg) {
+            button.style.background = button.dataset.originalBg;
+        } else {
+            button.style.background = isEditMode 
+                ? "linear-gradient(135deg, #ffc107, #fd7e14)" 
+                : "linear-gradient(135deg, var(--primary), var(--primary-light))";
+        }
+    }
+}
+
+// =============================================
+// Show loading on Save button
+// =============================================
+function showSaveLoading() {
+    const btnSave = document.getElementById('btnSave');
+    const isEditMode = btnSave?.innerText.includes('Update');
+    setButtonLoading(btnSave, true, isEditMode);
+}
+
+// =============================================
+// Hide loading on Save button
+// =============================================
+function hideSaveLoading() {
+    const btnSave = document.getElementById('btnSave');
+    const isEditMode = btnSave?.innerText.includes('Update');
+    setButtonLoading(btnSave, false, isEditMode);
+}
+
+        // =============================================
+        // SAVE OR UPDATE BUTTON FUNCTIONALITIES
+        // =============================================
+
+        async function saveOrUpdate() {
+            const url = document.getElementById('appsScriptUrl').value.trim();
+            if (!url) { showMessage('Please enter your Google Apps Script URL first.', 'error'); return; }
+            if (isEditMode && bdsIsOffline) { showMessage('Fetch current Google Sheets records before updating an existing student.', 'error'); return; }
+            const required = ['studentName', 'fatherName', 'studentClass', 'rollNumber'];
+            for (const field of required) {
+                if (!document.getElementById(field).value.trim()) {
+                    showMessage('Please fill ' + field.replace(/([A-Z])/g, ' $1').toLowerCase() + '.', 'error');
+                    document.getElementById(field).focus(); return;
+                }
+            }
+            const btnSave = document.getElementById('btnSave');
+            if (btnSave.disabled) return;
+            showSaveLoading();
+            try {
+                showMessage('Checking roll number...', 'info');
+                const duplicateCheck = await checkDuplicateRollNumber(document.getElementById('rollNumber').value);
+                if (duplicateCheck.isDuplicate && duplicateCheck.student) {
+                    const sameRecord = isEditMode && editingStudentData &&
+                        (duplicateCheck.student.recordId === editingStudentData.recordId || duplicateCheck.student.timestamp === editingStudentTimestamp);
+                    if (!sameRecord) {
+                        hideSaveLoading(); showDuplicateModal(document.getElementById('rollNumber').value, duplicateCheck.student); return;
+                    }
+                }
+
+                const data = {
+                    academicSession: document.getElementById('academicSession').value,
+                    reportTerm: document.getElementById('reportTerm').value,
+                    workingDaysTerm: document.getElementById('workingDaysTerm').value,
+                    term: document.getElementById('reportTerm').value,
+                    studentName: document.getElementById('studentName').value.trim(),
+                    fatherName: document.getElementById('fatherName').value.trim(),
+                    studentClass: document.getElementById('studentClass').value.trim(),
+                    rollNumber: document.getElementById('rollNumber').value.trim(),
+                    daysAttended: document.getElementById('daysAttended').value,
+                    totalWorkingDays: document.getElementById('totalWorkingDays').value,
+                    teacherComments: document.getElementById('teacherComments').value,
+                    classTeacherSign: document.getElementById('classTeacherSign').value,
+                    adminSign: document.getElementById('adminSign').value,
+                    headMistressSign: document.getElementById('headMistressSign').value,
+                    parentSign: document.getElementById('parentSign').value,
+                    timestamp: editingStudentTimestamp || new Date().toISOString(),
+                    recordId: isEditMode && editingStudentData ? editingStudentData.recordId || '' : '',
+                    recordVersion: isEditMode && editingStudentData ? editingStudentData.recordVersion || '' : '',
+                    removedSubjectIds: isEditMode ? Array.from(bdsExplicitSubjectRemovals) : [],
+                    subjects: []
+                };
+                const rows = document.getElementById('subjectsBody').rows;
+                for (let i = 0; i < rows.length; i++) {
+                    const inputs = rows[i].getElementsByTagName('input');
+                    if (!inputs[0].value.trim()) continue;
+                    data.subjects.push({
+                        subjectId: rows[i].dataset.subjectId || '',
+                        name: inputs[0].value.trim(), totalMarks: inputs[1].value,
+                        marksObtained: inputs[2].value.trim(), percentage: rows[i].cells[3].textContent,
+                        grade: rows[i].cells[4].textContent, remarks: inputs[3].value,
+                        signature: inputs[4].value
+                    });
+                }
+                showMessage(isEditMode ? 'Updating student record...' : 'Saving student record...', 'info');
+                const result = await apiPost({ ...data, action: isEditMode ? 'update' : 'create' });
+                const savedStudent = result.student || data;
+                if (!savedStudent.recordId) savedStudent.recordId = data.recordId || '';
+                if (isEditMode) cancelEdit();
+                hideSaveLoading();
+                try {
+                    await fetchAllStudents({ quiet: true });
+                    await loadSubjectCatalogue();
+                    showMessage('Save confirmed and latest Google Sheets data refreshed.', 'success');
+                } catch (refreshError) {
+                    bdsSyncStatus('Save confirmed, but the latest server refresh failed. Select Fetch All.', true);
+                    showMessage('Save confirmed, but refresh failed: ' + refreshError.message, 'info');
+                }
+            } catch (error) {
+                hideSaveLoading();
+                showMessage('Save was not confirmed: ' + error.message, 'error');
+            }
+        }
+
+        // =============================================
+        // CANCEL EDIT MODE
+        // =============================================
+        function cancelEdit() {
+            isEditMode = false;
+            editingStudentTimestamp = null;
+            editingStudentData = null;
+            bdsExplicitSubjectRemovals.clear();
+            document.getElementById('bdsEditingStale').hidden = true;
+            document.getElementById('editModeIndicator').style.display = 'none';
+            
+            // Restore save button
+            const btnSave = document.getElementById('btnSave');
+            btnSave.innerHTML = '💾 Save to Sheet';
+            btnSave.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-light))';
+            
+            // Clear form
+            clearForm();
+
+            // ✅ ADD THIS LINE - Update dashboard
+            updateDashboardMetrics();
+
+        }
+
+        // =============================================
+        // FETCH ALL STUDENTS
+        // =============================================
+        async function fetchAllStudents(options = {}) {
+            if (!options.quiet) { setLoading(true); showMessage('Fetching student records...', 'info'); }
+            try {
+                const result = await jsonpRequest({ mode: 'view' }, 25000);
+                if (!result || !Array.isArray(result.students)) throw new Error('Unexpected student data response.');
+                bdsWarningForOpenEdit(result.students);
+                bdsUseStudents(result.students, true);
+                const integrityWarnings = result.dataIntegrity && Array.isArray(result.dataIntegrity.warnings)
+                    ? result.dataIntegrity.warnings : [];
+                if (integrityWarnings.length) {
+                    console.warn('BDS spreadsheet integrity warnings:', integrityWarnings);
+                    const first = integrityWarnings[0];
+                    showMessage('Loaded ' + result.students.length + ' records with ' + integrityWarnings.length +
+                        ' warning(s). ' + first.sheet + ' row ' + first.row + ': ' + first.message, 'error');
+                } else if (!options.quiet) {
+                    showMessage('Loaded ' + result.students.length + ' current student records.', 'success');
+                }
+                return result.students;
+            } catch (error) {
+                bdsSyncStatus('Server refresh failed. Previously loaded records may be outdated. ' + error.message, true);
+                if (!options.quiet) showMessage('Failed to fetch current records: ' + error.message, 'error');
+                console.error('BDS refresh:', error);
+                if (options.quiet) throw error;
+                return null;
+            } finally { if (!options.quiet) setLoading(false); }
+        }
+
+        // =============================================
+        // Populate Class Filters
+        // =============================================
+        function populateClassFilters(students) {
+            const gradeSet = new Set();
+            
+            students.forEach(student => {
+                const classStr = student.studentClass || '';
+                if (classStr.includes('-')) {
+                    const [grade] = classStr.split('-');
+                    gradeSet.add(grade.trim());
+                } else if (classStr) {
+                    gradeSet.add(classStr.trim());
+                }
+            });
+
+            // Sort grades according to gradeOrder
+            const sortedGrades = Array.from(gradeSet).sort((a, b) => {
+                const orderA = gradeOrder[a] || 999;
+                const orderB = gradeOrder[b] || 999;
+                return orderA - orderB;
+            });
+
+            // Populate grade dropdown
+            const gradeSelect = document.getElementById('gradeFilter');
+            gradeSelect.innerHTML = '<option value="all">All Grades</option>';
+            sortedGrades.forEach(grade => {
+                const option = document.createElement('option');
+                option.value = grade;
+                option.textContent = grade;
+                gradeSelect.appendChild(option);
+            });
+
+            // Reset section dropdown
+            updateSectionOptions();
+        }
+
+        // =============================================
+        // Update Section Options based on selected Grade
+        // =============================================
+        function updateSectionOptions() {
+            const gradeSelect = document.getElementById('gradeFilter');
+            const sectionSelect = document.getElementById('sectionFilter');
+            const selectedGrade = gradeSelect.value;
+            
+            // Clear current options
+            sectionSelect.innerHTML = '<option value="all">All Sections</option>';
+            
+            if (selectedGrade === 'all') {
+                return;
+            }
+
+            // Get all students from storage
+            const students = bdsAuthoritativeStudents;
+            const sections = new Set();
+            
+            students.forEach(student => {
+                const classStr = student.studentClass || '';
+                if (classStr.includes('-')) {
+                    const [grade, section] = classStr.split('-');
+                    if (grade === selectedGrade) {
+                        sections.add(section.trim());
+                    }
+                }
+            });
+
+            // Add section options
+            Array.from(sections).sort().forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionSelect.appendChild(option);
+            });
+        }
+
+// =============================================
+// PROFESSIONAL DASHBOARD METRICS
+// =============================================
+function updateDashboardMetrics() {
+    const students = bdsAuthoritativeStudents;
+    const gradeCounts = Object.fromEntries(BDS_GRADE_ORDER.map(grade => [grade, 0]));
+    const classStats = {};
+    const subjectStats = {};
+    let passed = 0, assessedStudents = 0, percentageSum = 0;
+
+    students.forEach(student => {
+        const summary = calculateStudentSummary(student.subjects || []);
+        const className = String(student.studentClass || 'Unspecified');
+        if (!classStats[className]) classStats[className] = { count: 0, assessed: 0, percentageSum: 0, passed: 0 };
+        classStats[className].count++;
+
+        if (summary.totalMarks > 0) {
+            assessedStudents++;
+            percentageSum += summary.percentage;
+            gradeCounts[summary.grade] = (gradeCounts[summary.grade] || 0) + 1;
+            if (summary.grade !== 'F') passed++;
+            classStats[className].assessed++;
+            classStats[className].percentageSum += summary.percentage;
+            if (summary.grade !== 'F') classStats[className].passed++;
+        }
+
+        (student.subjects || []).forEach(subject => {
+            const marksText = subject.marksObtained == null ? '' : String(subject.marksObtained).trim();
+            const total = Number(subject.totalMarks) || 0;
+            if (marksText === '' || total <= 0) return;
+            const key = String(subject.name || 'Unnamed subject').trim();
+            if (!key) return;
+            if (!subjectStats[key]) subjectStats[key] = { totalMarks: 0, obtainedMarks: 0, assessed: 0, absent: 0 };
+            subjectStats[key].totalMarks += total;
+            subjectStats[key].assessed++;
+            if (marksText.toUpperCase() === 'A') subjectStats[key].absent++;
+            else subjectStats[key].obtainedMarks += Number(marksText) || 0;
+        });
+    });
+
+    const classCount = Object.keys(classStats).length;
+    const passRate = assessedStudents ? Math.round(passed / assessedStudents * 100) : 0;
+    const average = assessedStudents ? Math.round(percentageSum / assessedStudents) : 0;
+    const completion = students.length ? Math.round(assessedStudents / students.length * 100) : 0;
+    const bestGrade = BDS_GRADE_ORDER.find(grade => gradeCounts[grade] > 0) || '-';
+    document.getElementById('totalStudentsCount').textContent = students.length;
+    document.getElementById('totalClassesCount').textContent = classCount;
+    document.getElementById('passRate').textContent = assessedStudents ? passRate + '%' : 'No marks';
+    document.getElementById('topGrade').textContent = bestGrade;
+    document.getElementById('avgScore').textContent = assessedStudents ? average + '%' : 'No marks';
+    document.getElementById('avgScoreBar').style.width = average + '%';
+    document.getElementById('completionRate').textContent = completion + '%';
+    document.getElementById('completionDetail').textContent = assessedStudents + '/' + students.length;
+    renderDashboardInsights(gradeCounts, classStats, assessedStudents, subjectStats);
+}
+
+function calculateStudentSummary(subjects) {
+    let totalMarks = 0, obtainedMarks = 0;
+    (subjects || []).forEach(subject => {
+        const marks = subject.marksObtained == null ? '' : String(subject.marksObtained).trim();
+        if (marks === '') return;
+        const total = Number(subject.totalMarks) || 0;
+        if (total <= 0) return;
+        totalMarks += total;
+        if (marks.toUpperCase() !== 'A') obtainedMarks += Number(marks) || 0;
+    });
+    const percentage = totalMarks ? Number((obtainedMarks / totalMarks * 100).toFixed(2)) : 0;
+    const grade = !totalMarks ? '-' : bdsGradeForPercentage(obtainedMarks / totalMarks * 100);
+    return { totalMarks, obtainedMarks, percentage, grade };
+}
+
+function renderDashboardInsights(gradeCounts, classStats, assessedStudents, subjectStats) {
+    const gradeHost = document.getElementById('bdsGradeChart');
+    const classHost = document.getElementById('bdsClassOverview');
+    const subjectHost = document.getElementById('bdsSubjectPerformance');
+    if (!gradeHost || !classHost || !subjectHost) return;
+
+    if (!assessedStudents) {
+        gradeHost.innerHTML = '<div class="bds-empty-insight">No assessed student results are available yet.</div>';
+    } else {
+        const maxCount = Math.max(...Object.values(gradeCounts), 1);
+        gradeHost.innerHTML = BDS_GRADE_ORDER.map(grade => `
+            <div class="bds-grade-row"><strong>${grade}</strong><div class="bds-grade-track"><div class="bds-grade-fill" style="width:${gradeCounts[grade] / maxCount * 100}%"></div></div><span>${gradeCounts[grade]}</span></div>`).join('');
+    }
+
+    const classes = Object.entries(classStats).sort((a,b) => b[1].count-a[1].count).slice(0,6);
+    classHost.innerHTML = classes.length ? classes.map(([name, stats]) => {
+        const average = stats.assessed ? Math.round(stats.percentageSum / stats.assessed) : null;
+        const passRate = stats.assessed ? Math.round(stats.passed / stats.assessed * 100) : null;
+        return `<div class="bds-class-item"><span>${escapeHTML(name)} <small>(${stats.count})</small></span><strong>${average == null ? 'No results' : average + '% avg · ' + passRate + '% pass'}</strong></div>`;
+    }).join('') : '<div class="bds-empty-insight">No class information available.</div>';
+
+    const subjects = Object.entries(subjectStats).map(([name, stats]) => ({
+        name, assessed: stats.assessed,
+        percentage: stats.totalMarks ? stats.obtainedMarks / stats.totalMarks * 100 : 0,
+        absent: stats.absent
+    })).sort((a,b) => b.assessed-a.assessed || b.percentage-a.percentage).slice(0,6);
+    subjectHost.innerHTML = subjects.length ? subjects.map(subject => `
+        <div class="bds-performance-item"><span>${escapeHTML(subject.name)} <small>(${subject.assessed})</small></span><strong>${subject.percentage.toFixed(1)}%</strong><div class="bds-performance-track"><div class="bds-performance-fill" style="width:${Math.max(0,Math.min(100,subject.percentage))}%"></div></div></div>`
+    ).join('') : '<div class="bds-empty-insight">No assessed subject results are available yet.</div>';
+}
+
+        // =============================================
+        // Apply Filters
+        // =============================================
+        function applyFilters() {
+            const grade = document.getElementById('gradeFilter').value;
+            const section = document.getElementById('sectionFilter').value;
+            const rollNo = document.getElementById('searchRollNo').value.trim();
+
+            // Show active filters
+            const activeFiltersDiv = document.getElementById('activeFilters');
+            let filterText = [];
+            if (grade !== 'all') filterText.push(`Grade: ${grade}`);
+            if (section !== 'all') filterText.push(`Section: ${section}`);
+            if (rollNo) filterText.push(`Roll No: ${rollNo}`);
+            
+            if (filterText.length > 0) {
+                activeFiltersDiv.style.display = 'flex';
+                activeFiltersDiv.innerHTML = `
+                    <span style="font-weight: 600; color: var(--primary);">Active Filters:</span>
+                    ${filterText.map(f => `<span class="filter-badge">${escapeHTML(f)} <button type="button" onclick="clearFilter('${f.split(':')[0].toLowerCase()}')" aria-label="Remove ${escapeHTML(f.split(':')[0])} filter">✕</button></span>`).join('')}
+                `;
+            } else {
+                activeFiltersDiv.style.display = 'none';
+            }
+
+            try {
+                const cachedData = bdsAuthoritativeStudents;
+                
+                if (cachedData.length === 0) {
+                    document.getElementById('searchResults').innerHTML = '<div class="message info">No data loaded. Click "Fetch All" first.</div>';
+                    return;
+                }
+
+                // Apply filters
+                let results = [...cachedData];
+
+                // Filter by grade
+                if (grade !== 'all') {
+                    results = results.filter(s => {
+                        const classStr = s.studentClass || '';
+                        if (classStr.includes('-')) {
+                            return classStr.split('-')[0].trim() === grade;
+                        }
+                        return classStr === grade;
+                    });
+                }
+
+                // Filter by section
+                if (section !== 'all') {
+                    results = results.filter(s => {
+                        const classStr = s.studentClass || '';
+                        if (classStr.includes('-')) {
+                            return classStr.split('-')[1].trim() === section;
+                        }
+                        return false; // Grade-only classes don't match section filter
+                    });
+                }
+
+                // Filter by roll number
+                if (rollNo) {
+                    results = results.filter(s => s.rollNumber == rollNo);
+                }
+
+                if (results.length > 0) {
+                    const sorted = results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    displayStudentRecords(sorted);
+                    showMessage(`Found ${results.length} record(s)`, 'success');
+                } else {
+                    document.getElementById('searchResults').innerHTML = '<div class="message error">No records match your filters</div>';
+                }
+                
+            } catch (e) {
+                showMessage('Search error: ' + e.message, 'error');
+            }
+        }
+
+        // =============================================
+        // Clear specific filter
+        // =============================================
+        function clearFilter(filterType) {
+            if (filterType === 'grade') {
+                document.getElementById('gradeFilter').value = 'all';
+                updateSectionOptions();
+            } else if (filterType === 'section') {
+                document.getElementById('sectionFilter').value = 'all';
+            } else if (filterType === 'roll') {
+                document.getElementById('searchRollNo').value = '';
+            }
+            applyFilters();
+        }
+
+        // =============================================
+        // Keep old searchStudent for backward compatibility
+        // =============================================
+        function searchStudent() {
+            applyFilters();
+        }
+
+        // =============================================
+// DISPLAY STUDENT RECORDS - WITH PAGINATION
+// =============================================
+function displayStudentRecords(students) {
+    // Store all students
+    allStudents = students;
+    currentPage = 1;
+    renderCurrentPage();
+}
+
+function viewStudentAt(index) {
+    const student = allStudents[index];
+    if (student) loadStudentData(student);
+}
+
+function editStudentAt(index) {
+    const student = allStudents[index];
+    if (student) editStudentData(student);
+}
+
+function renderCurrentPage() {
+    const container = document.getElementById('searchResults');
+    
+    if (!allStudents || allStudents.length === 0) {
+        container.innerHTML = '<div class="message info">No records to display</div>';
+        return;
+    }
+
+    // Calculate pagination
+    const totalPages = Math.ceil(allStudents.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = Math.min(start + itemsPerPage, allStudents.length);
+    const pageStudents = allStudents.slice(start, end);
+
+    // Build table HTML
+    let html = `
+        <div class="table-container">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Name</th>
+                        <th>Father</th>
+                        <th>Class</th>
+                        <th>Report Term</th>
+                        <th>Academic Session</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    pageStudents.forEach((student, pageIndex) => {
+        const date = student.timestamp ? new Date(student.timestamp).toLocaleDateString() : 'N/A';
+        const studentIndex = start + pageIndex;
+        html += `
+            <tr>
+                <td>${escapeHTML(student.rollNumber || 'N/A')}</td>
+                <td>${escapeHTML(student.studentName || 'N/A')}</td>
+                <td>${escapeHTML(student.fatherName || 'N/A')}</td>
+                <td>${escapeHTML(student.studentClass || 'N/A')}</td>
+                <td>${escapeHTML(student.reportTerm || student.term || 'N/A')}</td>
+                <td>${escapeHTML(student.academicSession || '2025-26')}</td>
+                <td>${escapeHTML(date)}</td>
+                <td>
+                    <button class="load-btn" type="button" onclick="viewStudentAt(${studentIndex})">View</button>
+                    <button class="edit-btn" type="button" onclick="editStudentAt(${studentIndex})">Edit</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    // Close the results table before rendering the pagination controls.
+html += `</tbody></table></div>`;
+
+    // Pagination Controls - Professional Mobile-First Design
+html += `
+    <!-- Professional Pagination -->
+    <div style="margin-top: 24px; background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e9ecef;">
+        
+        <!-- Mobile: Stacked, Desktop: Row -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- Stats & Per Page Row -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #e7f5ff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 40px; font-size: 14px;">📊</span>
+                    <span style="color: #495057; font-size: 14px;">
+                        <strong style="color: #1e3c72;">${start + 1}-${end}</strong> of <strong style="color: #1e3c72;">${allStudents.length}</strong> records
+                    </span>
+                </div>
+                
+                <!-- Per Page Selector - Compact -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #6c757d; font-size: 13px;">Show</span>
+                    <select onchange="changeItemsPerPage(this.value)" style="padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 40px; font-size: 14px; background: white; cursor: pointer; outline: none;">
+                        <option value="10" ${itemsPerPage === 10 ? 'selected' : ''}>10</option>
+                        <option value="25" ${itemsPerPage === 25 ? 'selected' : ''}>25</option>
+                        <option value="50" ${itemsPerPage === 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${itemsPerPage === 100 ? 'selected' : ''}>100</option>
+                    </select>
+                    <span style="color: #6c757d; font-size: 13px;">per page</span>
+                </div>
+            </div>
+            
+            <!-- Page Navigation - Mobile Optimized -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                
+                <!-- Previous Button -->
+                <button onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''} style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; background: ${currentPage === 1 ? '#f8f9fa' : 'white'}; border: 1px solid ${currentPage === 1 ? '#e9ecef' : '#1e3c72'}; border-radius: 40px; color: ${currentPage === 1 ? '#adb5bd' : '#1e3c72'}; font-weight: 500; font-size: 14px; cursor: ${currentPage === 1 ? 'not-allowed' : 'pointer'}; transition: all 0.2s;">
+                    <span style="font-size: 16px;">←</span>
+                    <span class="prev-text">Previous</span>
+                </button>
+                
+                <!-- Page Info - Compact on Mobile -->
+                <div style="display: flex; align-items: center; gap: 4px; background: #f8f9fa; padding: 6px 12px; border-radius: 40px;">
+                    <span style="color: #1e3c72; font-weight: 600; font-size: 15px;">${currentPage}</span>
+                    <span style="color: #6c757d; font-size: 13px;">/</span>
+                    <span style="color: #6c757d; font-size: 13px;">${totalPages}</span>
+                </div>
+                
+                <!-- Next Button -->
+                <button onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''} style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; background: ${currentPage === totalPages ? '#f8f9fa' : 'white'}; border: 1px solid ${currentPage === totalPages ? '#e9ecef' : '#1e3c72'}; border-radius: 40px; color: ${currentPage === totalPages ? '#adb5bd' : '#1e3c72'}; font-weight: 500; font-size: 14px; cursor: ${currentPage === totalPages ? 'not-allowed' : 'pointer'}; transition: all 0.2s;">
+                    <span class="next-text">Next</span>
+                    <span style="font-size: 16px;">→</span>
+                </button>
+            </div>
+            
+            <!-- Quick Jump (Optional - shows on tablet/desktop) -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;" class="quick-jump">
+                <span style="color: #6c757d; font-size: 13px;">Jump to page:</span>
+                <input id="quickJumpInput" type="number" min="1" max="${totalPages}" value="${currentPage}" onchange="jumpToPage(this.value)" style="width: 60px; padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 40px; text-align: center; font-size: 14px;">
+                <button onclick="jumpToPage(document.querySelector('#quickJumpInput').value)" style="background: #1e3c72; color: white; border: none; padding: 6px 16px; border-radius: 40px; font-size: 13px; cursor: pointer;">Go</button>
+            </div>
+        </div>
+    </div>
+`;
+
+    container.innerHTML = html;
+}
+
+function changePage(direction) {
+    currentPage += direction;
+    renderCurrentPage();
+}
+
+function changeItemsPerPage(value) {
+    itemsPerPage = parseInt(value);
+    currentPage = 1;
+    renderCurrentPage();
+}
+
+// Jump to specific page
+function jumpToPage(page) {
+    page = parseInt(page);
+    if (page >= 1 && page <= Math.ceil(allStudents.length / itemsPerPage)) {
+        currentPage = page;
+        renderCurrentPage();
+    }
+}
+
+        // =============================================
+        // CLEAR SEARCH RESULTS
+        // =============================================
+        function clearSearchResults() {
+            document.getElementById('searchResults').innerHTML = '<div class="message info">Select filters and click Search or Fetch All to load records</div>';
+            document.getElementById('searchRollNo').value = '';
+            document.getElementById('gradeFilter').value = 'all';
+            document.getElementById('sectionFilter').innerHTML = '<option value="all">All Sections</option>';
+            document.getElementById('activeFilters').style.display = 'none';
+
+            // ✅ ADD THIS LINE - Update dashboard
+            updateDashboardMetrics();
+
+            showMessage('Search results cleared', 'success');
+        }
+
+        // =============================================
+        // LOAD STUDENT DATA - Updated to handle new subject structure
+        // =============================================
+        function loadStudentData(student) {
+            // Load new fields
+            document.getElementById('academicSession').value = student.academicSession || '2025-26';
+            document.getElementById('reportTerm').value = student.reportTerm || student.term || '1st Term';
+            document.getElementById('workingDaysTerm').value = student.workingDaysTerm || student.term || '1st Term';
+            
+            // Load existing fields
+            document.getElementById('studentName').value = student.studentName || '';
+            document.getElementById('fatherName').value = student.fatherName || '';
+            document.getElementById('studentClass').value = student.studentClass || '';
+            document.getElementById('rollNumber').value = student.rollNumber || '';
+            document.getElementById('daysAttended').value = student.daysAttended == null ? '' : student.daysAttended;
+            document.getElementById('totalWorkingDays').value = student.totalWorkingDays == null || student.totalWorkingDays === '' ? '90' : student.totalWorkingDays;
+            document.getElementById('teacherComments').value = student.teacherComments || '';
+            document.getElementById('classTeacherSign').value = student.classTeacherSign || '';
+            document.getElementById('adminSign').value = student.adminSign || '';
+            document.getElementById('headMistressSign').value = student.headMistressSign || '';
+            document.getElementById('parentSign').value = student.parentSign || '';
+
+            const tbody = document.getElementById('subjectsBody');
+            tbody.innerHTML = '';
+            
+            if (student.subjects && student.subjects.length > 0) {
+                student.subjects.forEach(subj => {
+                    const row = tbody.insertRow();
+                    
+                    // Format percentage - ensure it's displayed without % symbol
+                    let percentage = subj.percentage === '' || subj.percentage == null ? '-' : subj.percentage;
+                    if (percentage !== '-' && percentage.toString().includes('%')) {
+                        percentage = percentage.toString().replace('%', '');
+                    }
+                    
+                    // Create row with onchange events for inputs
+                    row.dataset.subjectId = subj.subjectId || '';
+                    row.className = 'bds-subject-entry';
+                    row.innerHTML = `
+                        <td><input type="text" aria-label="Subject name" value="${escapeHTML(subj.name || '')}" onchange="updateRow(this)"></td>
+                        <td><input type="number" min="1" step="0.01" aria-label="Total marks" value="${escapeHTML(subj.totalMarks == null ? '' : subj.totalMarks)}" onchange="updateRow(this)"></td>
+                        <td><input type="text" aria-label="Marks obtained" value="${escapeHTML(subj.marksObtained == null ? '' : subj.marksObtained)}" onchange="updateRow(this)"></td>
+                        <td class="percentage-display">${escapeHTML(percentage)}</td>
+                        <td class="grade-display">${escapeHTML(subj.grade || '-')}</td>
+                        <td><input type="text" value="${escapeHTML(subj.remarks || '')}" placeholder="Remarks" onchange="updateRow(this)"></td>
+                        <td><input type="text" value="${escapeHTML(subj.signature || '')}" placeholder="Signature" onchange="updateRow(this)"></td>
+                        <td><button type="button" onclick="removeSubjectResultRow(this)" class="bds-remove-subject">✕</button></td>
+                    `;
+                    if (subj.marksObtained !== '' && subj.marksObtained != null) updateRow(row.cells[2].querySelector('input'));
+                });
+            } else {
+                // An existing student with no results has no assigned subjects.
+                // Catalogue subjects may be added explicitly using Add Subject.
+            }
+            
+            showTab('input');
+            showMessage('Student loaded successfully', 'success');
+        }
+
+        // =============================================
+        // EDIT STUDENT DATA (Edit mode)
+       // =============================================
+     function removeSubjectResultRow(button) {
+         const row = button.closest('tr');
+         const id = row && row.dataset.subjectId;
+         if (isEditMode && id && editingStudentData &&
+             (editingStudentData.subjects || []).some(item => item.subjectId === id)) {
+             if (!window.confirm('Remove this subject result from the student record when you save? This removal will be recorded in the audit log.')) return;
+             bdsExplicitSubjectRemovals.add(id);
+         }
+         if (row) row.remove();
+     }
+
+     function editStudentData(student) {
+    // CRITICAL: Set global variables FIRST
+    isEditMode = true;
+    editingStudentTimestamp = student.timestamp;
+    editingStudentData = student;
+    bdsExplicitSubjectRemovals.clear();
+    document.getElementById('bdsEditingStale').hidden = true;
+    window.editingStudentTimestamp = student.timestamp; // Backup
+    
+    console.log('✅ Edit mode activated for student:', student.rollNumber);
+    console.log('✅ Timestamp set to:', student.timestamp);
+    
+    // First load the data
+    loadStudentData(student);
+    
+    // Show edit mode indicator
+    document.getElementById('editModeIndicator').style.display = 'flex';
+    document.getElementById('editingRollNo').textContent = student.rollNumber;
+    
+    // Change save button to update
+    const btnSave = document.getElementById('btnSave');
+    btnSave.innerHTML = '✏️ Update Record';
+    btnSave.style.background = 'linear-gradient(135deg, #ffc107, #fd7e14)';
+    
+    // Unlock everything
+    const btnPrint = document.getElementById('btnPrint');
+    const btnClear = document.getElementById('btnClear');
+    const rollInput = document.getElementById('rollNumber');
+    
+    btnSave.disabled = false;
+    btnSave.style.opacity = "1";
+    btnSave.style.cursor = "pointer";
+    
+    btnPrint.disabled = false;
+    btnPrint.style.opacity = "1";
+    btnPrint.style.cursor = "pointer";
+    
+    btnClear.disabled = false;
+    btnClear.style.opacity = "1";
+    btnClear.style.cursor = "pointer";
+    
+    rollInput.style.borderColor = "#ffc107";
+    rollInput.style.backgroundColor = "#fff8e7";
+    
+    // Trigger duplicate check to update border color
+    setTimeout(() => checkDuplicateRollNo(), 100);
+    
+    showMessage('Edit mode enabled. Make your changes and click Update.', 'info');
+}
+
+        // =============================================
+        // PRINT REPORT CARD - UPDATED to add % symbol in PDF
+        // =============================================
+        function printReportCard() {
+            showMessage('Preparing PDF...', 'info');
+            
+            const reportHTML = generatePrintableHTML();
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            
+            if (!printWindow) {
+                alert('Please allow pop-ups for this website');
+                return;
+            }
+            
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            
+            printWindow.onload = function() {
+                setTimeout(function() {
+                    printWindow.print();
+                }, 500);
+            };
+            
+            showMessage('✅ Print window opened', 'success');
+        }
+
+        // =============================================
+        // GENERATE PRINTABLE HTML - UPDATED with new subject names and % symbol
+        // =============================================
+        function generatePrintableHTML() {
+            // Use new fields with fallbacks
+            const academicSession = document.getElementById('academicSession').value || '2025-26';
+            const reportTerm = document.getElementById('reportTerm').value || '1st Term';
+            const workingDaysTerm = document.getElementById('workingDaysTerm').value || '1st Term';
+            
+            const studentName = document.getElementById('studentName').value || '';
+            const fatherName = document.getElementById('fatherName').value || '';
+            const studentClass = document.getElementById('studentClass').value || '';
+            const rollNo = document.getElementById('rollNumber').value || '';
+            const daysAttended = document.getElementById('daysAttended').value || '';
+            const totalDays = document.getElementById('totalWorkingDays').value || '90';
+            const teacherComments = document.getElementById('teacherComments').value || '';
+            const classTeacherSign = document.getElementById('classTeacherSign').value || '';
+            const adminSign = document.getElementById('adminSign').value || '';
+            const headMistressSign = document.getElementById('headMistressSign').value || '';
+            const parentSign = document.getElementById('parentSign').value || '';
+            
+            const leftLogoUrl = 'https://raw.githubusercontent.com/penbeam/bds-report-cards/226b18442780cec5aff3c4de43dc445df08f3fe6/images/SZABIST_LOGO.png';
+            const rightLogoUrl = 'https://raw.githubusercontent.com/penbeam/bds-report-cards/226b18442780cec5aff3c4de43dc445df08f3fe6/images/BDS-Logo.png';
+            
+            const printableSubjects = [];
+            let subjectsHTML = '';
+
+            const rows = document.getElementById('subjectsBody').rows;
+            for (let i = 0; i < rows.length; i++) {
+                const inputs = rows[i].getElementsByTagName('input');
+                const subject = inputs[0].value || '';
+                const total = inputs[1].value || '';
+                const obtained = inputs[2].value.trim();
+                if (!subject) continue;
+                const calculated = bdsSubjectCalculation(total, obtained);
+                let percentage = calculated.percentage === '' ? '-' : String(calculated.percentage);
+                const grade = calculated.grade;
+                printableSubjects.push({ totalMarks: total, marksObtained: obtained });
+                const remarks = inputs[3].value || '';
+                const signature = inputs[4].value || '';
+                if (percentage !== '-' && percentage !== 'A' && percentage !== '' && !percentage.includes('%')) percentage += '%';
+                subjectsHTML += `
+                    <tr>
+                        <td style="border: 1px solid black; padding: 8px; text-align: left;">${escapeHTML(subject)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${escapeHTML(total)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${escapeHTML(obtained)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${escapeHTML(percentage)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${escapeHTML(grade)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: left;">${escapeHTML(remarks)}</td>
+                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${escapeHTML(signature)}</td>
+                    </tr>
+                `;
+
+            }
+
+            const printableSummary = calculateStudentSummary(printableSubjects);
+            const totalMarksSum = printableSummary.totalMarks;
+            const totalObtained = printableSummary.obtainedMarks;
+            const hasAssessedSubjects = totalMarksSum > 0;
+            const overallPercentage = hasAssessedSubjects ? printableSummary.percentage.toFixed(2) : '';
+            const overallGrade = printableSummary.grade;
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <title>${escapeHTML(studentName || "Student")} - Report Card</title>
+    <style>
+        * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+        }
+
+        body { 
+        font-family: Arial, sans-serif; 
+        background: white; 
+        margin: 5px !important; 
+        }
+
+        .report-card { 
+        max-width: 1100px;
+        margin: 0 auto; 
+        border: 2px solid #1e3c72; 
+        padding: 20px 5px; 
+        }
+
+        .logo-header { 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between;
+        margin-bottom: 10px; 
+        border-bottom: 2px solid black; 
+        padding-bottom: 10px; 
+        }
+
+        .logo-left { 
+        width: 80px; 
+        height: 40px; 
+        margin-left:10px;
+        margin-top:10px;
+        }
+
+        .logo-right { 
+        width: 80px; 
+        height: 80px; 
+        margin-right:10px;
+        margin-top:10px;
+        }
+
+
+        .logo-left img { 
+        max-width: 80px; 
+        max-height: 40px; 
+        object-fit: contain; 
+        }
+
+        .logo-right img { 
+        max-width: 80px; 
+        max-height: 80px; 
+        object-fit: contain; 
+        }
+
+
+        .title-section { 
+        text-align: center; 
+        flex: 1; 
+        }
+
+        .school-name { 
+        font-size: 18px; 
+        font-weight: bold; 
+        color: black; 
+        }
+
+        .management { 
+        font-size: 16px; 
+        font-weight: bold; 
+        margin: 10px 0px 0px 0px; 
+        }
+
+        .report-title { 
+        font-size: 20px; 
+        font-weight: bold; 
+        margin: 10px 0; 
+        text-decoration: underline; 
+        }
+
+        .academic-session { 
+        font-size: 18px; 
+        font-weight: bold; 
+        margin-bottom: 0px;
+        }
+
+        .student-info { 
+        border: 1px solid black; 
+        padding: 5px; 
+        margin-bottom: 15px; 
+        }
+
+        .info-row { 
+        display: flex; 
+        margin-bottom: 10px; 
+        }
+
+        .info-label { 
+        font-size: 12px;
+        font-weight: bold; 
+        width: 150px; 
+        }
+
+        .info-value { 
+        font-size: 12px;
+        border-bottom: 1px solid black; 
+        flex: 1; 
+        margin-right: 20px;
+        text-align: center;
+        font-weight: 600; 
+        }
+
+        table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-bottom: 20px; 
+        }
+
+        th { 
+        background: white; 
+        color: black; 
+        padding: 10px 5px; 
+        border: 1px solid black;
+        font-size: 12px; 
+        font-weight: bold;
+        text-transform: uppercase;    
+        letter-spacing: 0.5px;       
+        }
+
+        td { 
+        border: 1px solid black; 
+        padding: 10px 5px !important; 
+        font-size:12px;
+        }
+
+        .summary-box { 
+        border: 1px solid black; 
+        padding: 10px 30px; 
+        margin-bottom: 20px; 
+        background: white;
+        font-size: 15px; 
+        text-align: center;
+        }
+
+        .comments-box { 
+        border: 1px solid black; 
+        padding: 10px 20px; 
+        margin-bottom: 60px;
+        font-size: 15px; 
+        }
+
+        .signatures { 
+        display: flex; 
+        justify-content: space-between; 
+        margin-top: 50px; 
+        }
+
+        .signature-item { 
+        text-align: center; 
+        width: 150px; 
+        font-size: 12px;
+        font-style: italic;
+font-weight: 600;
+        }
+
+        .signature-line { 
+        border-top: 1px solid black !important; 
+        margin-bottom: 5px; 
+        }
+
+        .date { 
+        text-align: right; 
+        margin-top: 30px;
+        display:none; 
+        }
+        
+        @media print { 
+            @page { size: A4; margin: 0.5in; @top-center { content: ""; } @bottom-center { content: ""; } }
+            body { margin: 0; padding: 0; }
+            th { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-card">
+        <div class="logo-header">
+            <div class="logo-left">${leftLogoUrl !== 'YOUR_LEFT_LOGO_URL_HERE' ? `<img src="${leftLogoUrl}">` : ''}</div>
+            <div class="title-section">
+                <div class="school-name">GGHS BENAZIR DISTRICT SCHOOL NAWABSHAH-1</div>
+                <div class="management">Under the Management of SZABIST Zab-ed</div>
+                <div class="report-title">${escapeHTML(reportTerm.toUpperCase())} REPORT CARD</div>
+                <div class="academic-session">Academic Session ${escapeHTML(academicSession)}</div>
+            </div>
+            <div class="logo-right">${rightLogoUrl !== 'YOUR_RIGHT_LOGO_URL_HERE' ? `<img src="${rightLogoUrl}">` : ''}</div>
+        </div>
+
+        <div class="student-info">
+            <div class="info-row"><span class="info-label">Student's Name:</span><span class="info-value">${escapeHTML(studentName)}</span><span class="info-label">Father's Name:</span><span class="info-value">${escapeHTML(fatherName)}</span></div>
+            <div class="info-row"><span class="info-label">Class/Section:</span><span class="info-value">${escapeHTML(studentClass)}</span><span class="info-label">Roll No:</span><span class="info-value">${escapeHTML(rollNo)}</span></div>
+            <div class="info-row"><span class="info-label">Days Attended:</span><span class="info-value">${escapeHTML(daysAttended)}</span><span class="info-label">T. Work Days (${escapeHTML(workingDaysTerm)}):</span><span class="info-value">${escapeHTML(totalDays)}</span></div>
+        </div>
+
+        <table>
+            <thead><tr><th>Subject</th><th>Total Marks</th><th>Marks Obtained</th><th>%age</th><th>Grade</th><th>Subject Teacher's Remarks</th><th>Teacher's Signature</th></tr></thead>
+            <tbody>${subjectsHTML}</tbody>
+        </table>
+
+        <div class="summary-box"><div><strong>Overall Obtained Marks (out of ${totalMarksSum}):</strong> ${totalObtained}<strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Percentage:</strong> ${hasAssessedSubjects ? overallPercentage + "%" : "-"} &nbsp;&nbsp; <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grade:</strong> ${overallGrade}</div></div>
+
+        <div class="comments-box"><div><strong>Class Teacher's Comments:</strong></div><div style="margin-top:10px; font-style:italic; white-space:pre-wrap;">${escapeHTML(teacherComments)}</div></div>
+
+        <div class="signatures">
+    <div class="signature-item">
+        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(classTeacherSign) || '&nbsp;'}</div>
+        <div class="signature-line"></div>
+        <div>Class Teacher Signature</div>
+    </div>
+    <div class="signature-item">
+        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(adminSign) || '&nbsp;'}</div>
+        <div class="signature-line"></div>
+        <div>Admin Signature</div>
+    </div>
+    <div class="signature-item">
+        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(headMistressSign) || '&nbsp;'}</div>
+        <div class="signature-line"></div>
+        <div>Head Mistress Signature</div>
+    </div>
+    <div class="signature-item">
+        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(parentSign) || '&nbsp;'}</div>
+        <div class="signature-line"></div>
+        <div>Parent Signature</div>
+    </div>
+</div>
+
+        <div class="date">Date: ${new Date().toLocaleDateString()}</div>
+    </div>
+</body>
+</html>`;
+        }
+
+        // =============================================
+        // SHOW PREVIEW
+        // =============================================
+        function showPreview() {
+            const previewDiv = document.getElementById('reportPreview');
+            previewDiv.innerHTML = generatePrintableHTML().replace(/<!DOCTYPE.*?>/, '').replace(/<html>.*?<body>/s, '').replace(/<\/body>.*?<\/html>/s, '');
+        }
+
+        // =============================================
+        // UTILITY FUNCTIONS
+        // =============================================
+        function showTab(tabName) {
+            document.querySelectorAll('.tabs .tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+            const activeTab = document.querySelector('.tabs .tab[onclick*="' + tabName + '"]');
+            if (activeTab) { activeTab.classList.add('active'); activeTab.setAttribute('aria-selected', 'true'); }
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (tabName === 'preview') {
+                showPreview();
+            }
+        }
+
+        let messageHideTimer = null;
+        function showMessage(text, type) {
+            const msg = document.getElementById('messageBox');
+            if (!msg) return;
+            clearTimeout(messageHideTimer);
+            msg.textContent = text;
+            msg.className = 'message ' + type;
+            msg.style.display = 'block';
+            messageHideTimer = setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        }
+
+        function setLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+
+
+        // =============================================
+       // CLEAR FORM FUNCTION
+       // =============================================
+
+        function clearForm() {
+    // 1. Clear text and dropdown fields (Set to empty or defaults)
+    document.getElementById('academicSession').value = '2025-26';
+    document.getElementById('reportTerm').value = '1st Term';
+    document.getElementById('workingDaysTerm').value = '1st Term';
+    
+    // Clear existing fields
+    document.getElementById('studentName').value = '';
+    document.getElementById('fatherName').value = '';
+    document.getElementById('studentClass').value = '';
+    document.getElementById('rollNumber').value = '';
+    document.getElementById('daysAttended').value = '';
+    document.getElementById('totalWorkingDays').value = '90';
+    document.getElementById('teacherComments').value = '';
+    document.getElementById('classTeacherSign').value = '';
+    document.getElementById('adminSign').value = '';
+    document.getElementById('headMistressSign').value = '';
+    document.getElementById('parentSign').value = '';
+
+    // 2. Reset the subjects table
+    loadSubjects();
+
+    // 3. RESET GLOBAL VARIABLES
+    isEditMode = false;
+    editingStudentTimestamp = null;
+    editingStudentData = null;
+    bdsExplicitSubjectRemovals.clear();
+    document.getElementById('bdsEditingStale').hidden = true;
+    window.editingStudentTimestamp = null;
+    pendingDuplicateData = null;
+    
+    // 4. HIDE THE EDIT MODE INDICATOR ← ADD THIS LINE
+    document.getElementById('editModeIndicator').style.display = 'none';
+    
+    // Close modal if it's open
+    const modal = document.getElementById('duplicateModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+
+    // 5. RESET BUTTONS AND INPUT STYLES
+    const btnSave = document.getElementById('btnSave');
+    const btnPrint = document.getElementById('btnPrint');
+    const rollInput = document.getElementById('rollNumber');
+
+    if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.style.opacity = "1";
+        btnSave.style.cursor = "pointer";
+        btnSave.innerHTML = "💾 Save to Sheet";
+        btnSave.style.background = "linear-gradient(135deg, var(--primary), var(--primary-light))";
+    }
+    if (btnPrint) {
+        btnPrint.disabled = false;
+        btnPrint.style.opacity = "1";
+        btnPrint.style.cursor = "pointer";
+    }
+    if (rollInput) {
+        rollInput.style.borderColor = "#ddd";
+        rollInput.style.backgroundColor = "#ffffff";
+    }
+    
+    // 6. Cancel edit mode if active (calls cancelEdit which also resets)
+    if (isEditMode) {
+        cancelEdit();
+    }
+    
+    // 7. Final success message
+    showMessage('Form cleared and unlocked', 'success');
+}
+
+
+// =============================================
+// DUPLICATE CHECK FUNCTION - USES GLOBAL VARIABLES
+// =============================================
+async function checkDuplicateRollNo() {
+    const rollInput = document.getElementById('rollNumber');
+    const rollNo = rollInput.value.trim();
+    if (!rollNo) {
+        rollInput.style.borderColor = '';
+        rollInput.style.backgroundColor = '';
+        const btnSave = document.getElementById('btnSave');
+        const btnPrint = document.getElementById('btnPrint');
+        if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = isEditMode ? '✏️ Update Record' : '💾 Save to Sheet'; }
+        if (btnPrint) btnPrint.disabled = false;
+        return;
+    }
+    const thisCheck = { id: Date.now() };
+    activeCheck = thisCheck;
+    try {
+        const result = await checkDuplicateRollNumber(rollNo);
+        if (activeCheck !== thisCheck) return;
+        const btnSave = document.getElementById('btnSave');
+        const btnPrint = document.getElementById('btnPrint');
+        if (result.isDuplicate && result.student) {
+            pendingDuplicateData = result.student;
+            document.getElementById('dupRollNo').textContent = rollNo;
+            document.getElementById('duplicateModal').classList.add('active');
+            rollInput.style.borderColor = '#dc3545';
+            rollInput.style.backgroundColor = '#fff8f8';
+            if (btnSave) { btnSave.disabled = true; btnSave.innerText = '⚠️ Duplicate Found'; }
+            if (btnPrint) btnPrint.disabled = true;
+        } else {
+            rollInput.style.borderColor = result.isSameRecord ? '#ffc107' : '#28a745';
+            rollInput.style.backgroundColor = result.isSameRecord ? '#fff8e7' : '#ffffff';
+            if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = isEditMode ? '✏️ Update Record' : '💾 Save to Sheet'; }
+            if (btnPrint) btnPrint.disabled = false;
+        }
+    } catch (error) {
+        console.error('Duplicate check failed:', error);
+        showMessage(error.message, 'error');
+    } finally {
+        if (activeCheck === thisCheck) activeCheck = null;
+    }
+}
+
+// =============================================
+// EXPORT FUNCTIONS
+// =============================================
+
+// Show export options modal (with toggle check)
+function showExportOptions() {
+    if (!EXPORT_ENABLED) {
+        // Show disabled modal
+        document.getElementById('exportDisabledModal').classList.add('active');
+        return;
+    }
+    
+    // Show normal export options
+    document.getElementById('exportModal').classList.add('active');
+}
+
+// Close export disabled modal
+function closeExportDisabledModal() {
+    document.getElementById('exportDisabledModal').classList.remove('active');
+}
+
+// Close export modal
+function closeExportModal() {
+    document.getElementById('exportModal').classList.remove('active');
+}
+
+// Handle export based on selected option
+function handleExport() {
+    const selectedOption = document.querySelector('input[name="exportType"]:checked').value;
+    
+    switch(selectedOption) {
+        case 'current':
+            exportCurrentView();
+            break;
+        case 'filtered':
+            exportFilteredData();
+            break;
+        case 'all':
+            exportAllData();
+            break;
+        case 'summary':
+            exportSummaryReport();
+            break;
+    }
+    
+    closeExportModal();
+}
+
+function csvCell(value) {
+    const text = value == null ? '' : String(value);
+    return '"' + text.replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+}
+
+// Export current view (what's shown in the table)
+function exportCurrentView() {
+    const table = document.querySelector('.results-table');
+    if (!table) { showMessage('No data to export', 'error'); return; }
+    const headerCells = Array.from(table.querySelectorAll('thead th')).filter(th => th.textContent.trim() !== 'Actions');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    if (!rows.length) { showMessage('No records are visible in the current view.', 'error'); return; }
+    const csv = [headerCells.map(th => csvCell(th.textContent.trim())).join(',')];
+    rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td')).slice(0, headerCells.length);
+        csv.push(cells.map(td => csvCell(td.textContent.trim())).join(','));
+    });
+    downloadCSV(csv.join('\r\n'), 'current_view.csv');
+    showMessage('Current view exported successfully!', 'success');
+}
+
+// Export filtered data (all students matching current filters)
+function exportFilteredData() {
+    const grade = document.getElementById('gradeFilter').value;
+    const section = document.getElementById('sectionFilter').value;
+    const rollNo = document.getElementById('searchRollNo').value.trim();
+    let students = bdsAuthoritativeStudents;
+    if (grade !== 'all') students = students.filter(student => {
+        const classStr = student.studentClass || '';
+        return classStr.includes('-') ? classStr.split('-')[0].trim() === grade : classStr.trim() === grade;
+    });
+    if (section !== 'all') students = students.filter(student => {
+        const parts = String(student.studentClass || '').split('-');
+        return parts.length > 1 && parts[1].trim() === section;
+    });
+    if (rollNo) students = students.filter(student => String(student.rollNumber || '').trim() === rollNo);
+    if (!students.length) { showMessage('No students match the filters', 'error'); return; }
+    const rows = [['Roll No','Student Name','Father Name','Class','Report Term','Academic Session','Date']];
+    students.forEach(student => rows.push([
+        student.rollNumber, student.studentName, student.fatherName, student.studentClass,
+        student.reportTerm || student.term, student.academicSession,
+        student.timestamp ? new Date(student.timestamp).toLocaleDateString() : 'N/A'
+    ]));
+    downloadCSV(rows.map(row => row.map(csvCell).join(',')).join('\r\n'), 'filtered_students.csv');
+    showMessage('Exported ' + students.length + ' filtered student records.', 'success');
+}
+
+// Export ALL data (complete with all subjects)
+function exportAllData() {
+    const students = bdsAuthoritativeStudents;
+    if (!students.length) { showMessage('No data to export', 'error'); return; }
+    const subjectNames = Array.from(new Set(students.flatMap(student => (student.subjects || []).map(subject => String(subject.name || '').trim()).filter(Boolean)))).sort((a,b) => a.localeCompare(b));
+    const headers = [
+        'Timestamp','Record ID','Roll No','Student Name','Father Name','Class/Section',
+        'Academic Session','Report Term','Working Days Term','Days Attended','Total Working Days',
+        'Teacher Comments','Class Teacher Sign','Admin Sign','Head Mistress Sign','Parent Sign'
+    ];
+    subjectNames.forEach(name => headers.push(name + ' Total Marks', name + ' Marks', name + ' Grade', name + ' Percentage', name + ' Remarks', name + ' Teacher Sign', name + ' Last Updated'));
+    headers.push('Total Marks','Obtained Marks','Overall Percentage','Overall Grade','Status');
+    const csvRows = [headers.map(csvCell).join(',')];
+    students.forEach(student => {
+        const subjectMap = {};
+        (student.subjects || []).forEach(subject => { subjectMap[subject.name] = subject; });
+        const row = [
+            student.timestamp, student.recordId, student.rollNumber, student.studentName, student.fatherName,
+            student.studentClass, student.academicSession, student.reportTerm || student.term,
+            student.workingDaysTerm, student.daysAttended, student.totalWorkingDays, student.teacherComments,
+            student.classTeacherSign, student.adminSign, student.headMistressSign, student.parentSign
+        ];
+        subjectNames.forEach(name => {
+            const subject = subjectMap[name] || {};
+            row.push(subject.totalMarks, subject.marksObtained, subject.grade, subject.percentage, subject.remarks, subject.signature, subject.lastUpdated);
+        });
+        const summary = calculateStudentSummary(student.subjects || []);
+        row.push(summary.totalMarks, summary.obtainedMarks, summary.totalMarks ? summary.percentage.toFixed(2) + '%' : '', summary.grade, 'Active');
+        csvRows.push(row.map(csvCell).join(','));
+    });
+    downloadCSV(csvRows.join('\r\n'), 'all_students_' + new Date().toISOString().slice(0,10) + '.csv');
+    showMessage('Exported ' + students.length + ' students with all dynamic subjects.', 'success');
+}
+
+// Export summary report - FIXED with "No Marks" category
+function exportSummaryReport() {
+    const students = bdsAuthoritativeStudents;
+    if (!students.length) { showMessage('No data to export', 'error'); return; }
+    const classBreakdown = {};
+    const gradeDist = { ...Object.fromEntries(BDS_GRADE_ORDER.map(grade => [grade, 0])), 'No Marks': 0 };
+    const subjectTotals = {};
+    let studentsWithNoMarks = 0, studentsWithSomeMarks = 0;
+    students.forEach(student => {
+        const className = student.studentClass || 'Unknown';
+        classBreakdown[className] = (classBreakdown[className] || 0) + 1;
+        const summary = calculateStudentSummary(student.subjects || []);
+        if (!summary.totalMarks) { gradeDist['No Marks']++; studentsWithNoMarks++; }
+        else { gradeDist[summary.grade]++; studentsWithSomeMarks++; }
+        (student.subjects || []).forEach(subject => {
+            const marks = subject.marksObtained == null ? '' : String(subject.marksObtained).trim();
+            const assessed = bdsSubjectCalculation(subject.totalMarks, marks);
+            if (!assessed.assessed || assessed.invalid) return;
+            const key = subject.name || 'Unnamed subject';
+            if (!subjectTotals[key]) subjectTotals[key] = { obtained: 0, maximum: 0, count: 0 };
+            subjectTotals[key].obtained += marks.toUpperCase() === 'A' ? 0 : Number(marks);
+            subjectTotals[key].maximum += Number(subject.totalMarks);
+            subjectTotals[key].count += 1;
+        });
+    });
+    const rows = [
+        ['STUDENT SUMMARY REPORT'],
+        ['Generated on', new Date().toLocaleString()],
+        ['Total Students', students.length],
+        [],
+        ['CLASS BREAKDOWN'], ['Class','Count'],
+        ...Object.keys(classBreakdown).sort().map(name => [name, classBreakdown[name]]),
+        [], ['OVERALL GRADE DISTRIBUTION'], ['Grade','Count'],
+        ...[...BDS_GRADE_ORDER, 'No Marks'].map(grade => [grade, gradeDist[grade]]),
+        [], ['SUBJECT AVERAGES (weighted assessed percentages)'], ['Subject','Average Percentage','Students Count'],
+        ...Object.keys(subjectTotals).sort().map(name => [name, (subjectTotals[name].obtained / subjectTotals[name].maximum * 100).toFixed(2) + '%', subjectTotals[name].count]),
+        [], ['DATA QUALITY SUMMARY'], ['Students with no assessed marks', studentsWithNoMarks], ['Students with assessed marks', studentsWithSomeMarks]
+    ];
+    downloadCSV(rows.map(row => row.map(csvCell).join(',')).join('\r\n'), 'summary_report.csv');
+    showMessage('Summary report exported successfully.', 'success');
+}
+
+
+// Helper function to download CSV
+function downloadCSV(csv, filename) {
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }); // \uFEFF for UTF-8 BOM
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+    </script>
+</body>
+</html>
