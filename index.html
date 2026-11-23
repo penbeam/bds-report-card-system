@@ -639,47 +639,8 @@
         /* =============================================
            MESSAGES & LOADING
         ============================================= */
-        #bds-report-app .message {
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            margin: 16px 0;
-            display: none;
-            font-weight: 500;
-            font-size: 14px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn  {
-            from {
-                transform: translateY(-10px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        #bds-report-app .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        #bds-report-app .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-
-        #bds-report-app .message.info {
-            background: #cce5ff;
-            color: #004085;
-            border: 1px solid #b8daff;
-            display: block;
-        }
+        /* Existing messageBox is retained for DOM compatibility; notifications use the global BDS toast stack. */
+        #bds-report-app #messageBox {display:none;}
 
         #bds-report-app .spinner {
             border: 4px solid rgba(30,60,114,0.1);
@@ -1237,7 +1198,11 @@
 </head>
 <body class="bds-page">
 
-    <section id="bds-access-gate" aria-label="BDS staff sign in">
+    <section id="bds-session-boot" aria-label="Checking BDS staff session" role="status" aria-live="polite">
+      <div class="bds-boot-panel"><img src="images/BDS-Logo.png" alt="BDS school logo" width="76" height="76"><h2>BDS Report Card System</h2><p id="bds-boot-message">Checking your staff session...</p><span class="bds-boot-spinner" aria-hidden="true"></span></div>
+    </section>
+    <div id="bds-toast-stack" aria-label="Application notifications" aria-live="polite" aria-atomic="false"></div>
+    <section id="bds-access-gate" aria-label="BDS staff sign in" hidden>
       <div class="bds-gate-layout">
         <div class="bds-gate-brand">
           <div class="bds-gate-brand-top">
@@ -1814,6 +1779,7 @@ function debounceCheck() {
             try { sessionStorage.removeItem(bdsSessionStorageKey()); } catch (_) {}
         }
         async function bdsOpenAuthenticatedWorkspace() {
+            document.getElementById('bds-session-boot').hidden = true;
             document.getElementById('bds-access-gate').hidden = true;
             document.getElementById('bds-report-app').hidden = false;
             await checkConnection();
@@ -1831,10 +1797,12 @@ function debounceCheck() {
             try { saved = JSON.parse(sessionStorage.getItem(bdsSessionStorageKey()) || 'null'); } catch (_) { saved = null; }
             if (!saved || !/^[a-f0-9]{64}$/.test(String(saved.token || '')) || !Number.isFinite(Number(saved.expiresAt)) || Date.now() >= Number(saved.expiresAt)) {
                 bdsForgetSession();
+                document.getElementById('bds-session-boot').hidden = true;
+                document.getElementById('bds-access-gate').hidden = false;
                 return;
             }
             const message = document.getElementById('bdsLoginMessage');
-            message.textContent = 'Restoring your staff session...';
+            document.getElementById('bds-boot-message').textContent = 'Restoring your staff session...';
             bdsSessionToken = saved.token;
             try {
                 const status = await jsonpRequest({ action: 'sessionStatus' }, 12000);
@@ -1853,6 +1821,7 @@ function debounceCheck() {
                     message.textContent = 'Unable to restore your session. Check your connection and refresh, or sign in again.';
                 }
                 document.getElementById('bds-report-app').hidden = true;
+                document.getElementById('bds-session-boot').hidden = true;
                 document.getElementById('bds-access-gate').hidden = false;
             }
         }
@@ -1917,12 +1886,14 @@ function debounceCheck() {
                 if (element) element.value = '';
             });
             document.getElementById('bds-report-app').hidden = true;
+            document.getElementById('bds-session-boot').hidden = true;
             document.getElementById('bds-access-gate').hidden = false;
             document.getElementById('bdsLoginPassword').value = '';
         }
         async function bdsLogout() {
             const token = bdsSessionToken, url = bdsCurrentEndpoint();
             bdsRequireLogin();
+            showMessage('You have signed out of BDS.', 'success');
             if (token && url) {
                 try { await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=UTF-8'},
                     body:JSON.stringify({action:'logout',sessionToken:token}) }); } catch (_) {}
@@ -2063,6 +2034,7 @@ function debounceCheck() {
                 <td><button type="button" aria-label="Remove subject row" onclick="removeSubjectResultRow(this)" class="bds-remove-subject">✕</button></td>
             `;
             if (obtained !== '') updateRow(row.cells[2].querySelector('input'));
+            if (arguments.length === 0) showMessage('Subject row added to the form. Save the record to keep your changes.', 'info');
             return row;
         }
 
@@ -2413,8 +2385,9 @@ function hideSaveLoading() {
             // Clear form
             clearForm();
 
-            // ✅ ADD THIS LINE - Update dashboard
+            // Keep dashboard up to date after leaving edit mode.
             updateDashboardMetrics();
+            showMessage('Editing cancelled. You are back in new-student mode.', 'info');
 
         }
 
@@ -2866,14 +2839,19 @@ html += `
 }
 
 function changePage(direction) {
-    currentPage += direction;
+    const next = currentPage + direction;
+    const total = Math.max(1, Math.ceil(allStudents.length / itemsPerPage));
+    if (next < 1 || next > total) return;
+    currentPage = next;
     renderCurrentPage();
+    showMessage('Showing page ' + currentPage + ' of ' + total + '.', 'info');
 }
 
 function changeItemsPerPage(value) {
     itemsPerPage = parseInt(value);
     currentPage = 1;
     renderCurrentPage();
+    showMessage('Showing ' + itemsPerPage + ' records per page.', 'info');
 }
 
 // Jump to specific page
@@ -2882,6 +2860,9 @@ function jumpToPage(page) {
     if (page >= 1 && page <= Math.ceil(allStudents.length / itemsPerPage)) {
         currentPage = page;
         renderCurrentPage();
+        showMessage('Moved to page ' + currentPage + '.', 'info');
+    } else {
+        showMessage('Please enter a valid page number.', 'warning');
     }
 }
 
@@ -2971,7 +2952,7 @@ function jumpToPage(page) {
              if (!window.confirm('Remove this subject result from the student record when you save? This removal will be recorded in the audit log.')) return;
              bdsExplicitSubjectRemovals.add(id);
          }
-         if (row) row.remove();
+         if (row) { row.remove(); showMessage(isEditMode && id ? 'Subject marked for removal. Save the student record to apply it.' : 'Subject row removed from the form.', 'info'); }
      }
 
      function editStudentData(student) {
@@ -3034,7 +3015,7 @@ function jumpToPage(page) {
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             
             if (!printWindow) {
-                alert('Please allow pop-ups for this website');
+                showMessage('Print window was blocked. Please allow pop-ups for this website.', 'error');
                 return;
             }
             
@@ -3298,7 +3279,34 @@ font-weight: 600;
             body { margin: 0; padding: 0; }
             th { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
-    </style>
+    
+        /* BDS session restoration and unified action notifications. */
+        #bds-session-boot {position:fixed; inset:0; z-index:10020; display:grid; place-items:center; padding:20px; background:radial-gradient(circle at 12% 12%,#1b5460 0%,#0b3242 45%,#092531 100%); font-family:Inter,"Segoe UI",Arial,sans-serif; color:#f4faf8;}
+        #bds-session-boot[hidden] {display:none;}
+        #bds-session-boot .bds-boot-panel {width:min(420px,100%); text-align:center; padding:clamp(28px,6vw,44px); border:1px solid rgba(255,255,255,.17); border-radius:24px; background:rgba(255,255,255,.055); box-shadow:0 24px 62px rgba(0,0,0,.19);}
+        #bds-session-boot img {display:block; width:76px; height:76px; object-fit:contain; margin:0 auto 20px; padding:8px; background:#fff; border-radius:18px;}
+        #bds-session-boot h2 {color:#fff; font-size:clamp(20px,4vw,25px); margin:0 0 9px; letter-spacing:-.025em;}
+        #bds-session-boot p {color:#c5dbd9; font-size:14px; line-height:1.6; margin:0;}
+        #bds-session-boot .bds-boot-spinner {display:block; width:31px; height:31px; margin:23px auto 0; border-radius:50%; border:3px solid rgba(255,255,255,.19); border-top-color:#9ae6d2; animation:bds-boot-spin .85s linear infinite;}
+        @keyframes bds-boot-spin {to {transform:rotate(360deg);}}
+        #bds-toast-stack {position:fixed; top:max(16px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); z-index:11000; width:min(400px,calc(100vw - 32px)); display:grid; gap:10px; pointer-events:none; font-family:Inter,"Segoe UI",Arial,sans-serif;}
+        #bds-toast-stack .bds-toast {pointer-events:auto; display:grid; grid-template-columns:26px minmax(0,1fr) 30px; gap:10px; align-items:start; border-radius:14px; border:1px solid #d2e0e1; padding:13px 12px 13px 14px; background:#fff; color:#173b45; box-shadow:0 12px 36px rgba(9,42,52,.18); animation:bds-toast-enter .2s ease both;}
+        #bds-toast-stack .bds-toast[data-kind="success"] {border-left:4px solid #19806d;}
+        #bds-toast-stack .bds-toast[data-kind="error"] {border-left:4px solid #b43c4b;}
+        #bds-toast-stack .bds-toast[data-kind="warning"] {border-left:4px solid #be7a19;}
+        #bds-toast-stack .bds-toast[data-kind="info"] {border-left:4px solid #37799c;}
+        #bds-toast-stack .bds-toast-icon {font-size:19px; line-height:1.4; color:#1a7165;}
+        #bds-toast-stack .bds-toast[data-kind="error"] .bds-toast-icon {color:#b43c4b;}
+        #bds-toast-stack .bds-toast[data-kind="warning"] .bds-toast-icon {color:#ad701c;}
+        #bds-toast-stack .bds-toast-body {min-width:0; font-size:13px; line-height:1.5; overflow-wrap:anywhere;}
+        #bds-toast-stack .bds-toast-body strong {display:block; font-size:12px; margin-bottom:2px;}
+        #bds-toast-stack .bds-toast-close {border:0; background:transparent; font:inherit; font-size:20px; line-height:1; color:#58717a; cursor:pointer; border-radius:7px; width:30px; height:30px;}
+        #bds-toast-stack .bds-toast-close:hover {background:#edf3f2;}
+        #bds-toast-stack .bds-toast-close:focus-visible {outline:3px solid #287e76; outline-offset:2px;}
+        @keyframes bds-toast-enter {from {opacity:0; transform:translateY(-9px);} to {opacity:1; transform:translateY(0);}}
+        @media (max-width:600px) {#bds-toast-stack {left:12px; right:12px; top:max(12px,env(safe-area-inset-top)); width:auto;} #bds-toast-stack .bds-toast {padding:12px;}}
+        @media (prefers-reduced-motion:reduce) {#bds-session-boot .bds-boot-spinner, #bds-toast-stack .bds-toast {animation:none;}}
+</style>
 </head>
 <body>
     <div class="report-card">
@@ -3380,15 +3388,42 @@ font-weight: 600;
             }
         }
 
-        let messageHideTimer = null;
-        function showMessage(text, type) {
-            const msg = document.getElementById('messageBox');
-            if (!msg) return;
-            clearTimeout(messageHideTimer);
-            msg.textContent = text;
-            msg.className = 'message ' + type;
-            msg.style.display = 'block';
-            messageHideTimer = setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        const bdsToastTimers = new Map();
+        function showMessage(text, type = 'info') {
+            const stack = document.getElementById('bds-toast-stack');
+            if (!stack) return;
+            const kind = ['success','error','warning','info'].includes(type) ? type : 'info';
+            const titles = {success:'Success',error:'Action needs attention',warning:'Please review',info:'BDS update'};
+            const symbols = {success:'✓',error:'!',warning:'!',info:'i'};
+            // Replace transient progress announcements, without suppressing terminal results.
+            if (kind === 'info' && /^(Fetching student records|Checking roll number|Saving student record|Updating student record|Preparing PDF)/.test(String(text))) {
+                stack.querySelectorAll('.bds-toast[data-progress="true"]').forEach(node => bdsDismissToast(node));
+            } else {
+                stack.querySelectorAll('.bds-toast[data-progress="true"]').forEach(node => bdsDismissToast(node));
+            }
+            const toast = document.createElement('div');
+            toast.className = 'bds-toast';
+            toast.dataset.kind = kind;
+            toast.dataset.progress = kind === 'info' && /^(Fetching student records|Checking roll number|Saving student record|Updating student record|Preparing PDF)/.test(String(text)) ? 'true' : 'false';
+            toast.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+            const icon = document.createElement('span');
+            icon.className = 'bds-toast-icon'; icon.setAttribute('aria-hidden','true'); icon.textContent = symbols[kind];
+            const body = document.createElement('div'); body.className = 'bds-toast-body';
+            const heading = document.createElement('strong'); heading.textContent = titles[kind];
+            const detail = document.createElement('span'); detail.textContent = String(text);
+            body.append(heading,detail);
+            const close = document.createElement('button'); close.type = 'button'; close.className = 'bds-toast-close'; close.setAttribute('aria-label','Dismiss notification'); close.textContent = '×';
+            close.addEventListener('click', () => bdsDismissToast(toast));
+            toast.append(icon, body, close);
+            stack.prepend(toast);
+            while (stack.children.length > 4) bdsDismissToast(stack.lastElementChild);
+            // Errors remain until dismissed. Ordinary notices disappear automatically.
+            if (kind !== 'error') bdsToastTimers.set(toast, setTimeout(() => bdsDismissToast(toast), kind === 'warning' ? 9000 : 5200));
+        }
+        function bdsDismissToast(toast) {
+            if (!toast) return;
+            clearTimeout(bdsToastTimers.get(toast)); bdsToastTimers.delete(toast);
+            toast.remove();
         }
 
         function setLoading(show) {
