@@ -1117,53 +1117,122 @@
             #bds-report-app *, #bds-report-app *::before, #bds-report-app *::after { animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms; scroll-behavior:auto; }
         }
 
-        /* BDS shared staff access and connection settings, authoritative scoped styles */
-        #bds-access-gate { --bds-gate-ink:#123849; --bds-gate-teal:#136e67; position:fixed; inset:0; z-index:10000;
-            overflow-y:auto; background:radial-gradient(ellipse at 5% 5%,#286b78 0%,transparent 43%),linear-gradient(135deg,#0e2d3f,#174758 68%,#103445);
-            display:grid; place-items:center; padding:clamp(15px,3.5vw,48px); font-family:Inter,"Segoe UI",Arial,sans-serif; }
-        #bds-access-gate[hidden], #bds-report-app[hidden] { display:none; }
-        #bds-access-gate .bds-gate-layout { width:min(990px,100%); display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,440px);
-            overflow:hidden; border:1px solid rgba(255,255,255,.16); border-radius:27px; box-shadow:0 35px 110px rgba(0,0,0,.25); background:#fff; }
-        #bds-access-gate .bds-gate-brand { color:white; padding:clamp(30px,5vw,65px); display:flex; flex-direction:column; justify-content:space-between;
-            background:radial-gradient(circle at 85% 4%,rgba(125,225,205,.23),transparent 40%),linear-gradient(165deg,#123a4e,#0e2d3f); }
-        #bds-access-gate .bds-gate-brand img { width:82px; height:82px; object-fit:contain; background:white; padding:8px; border-radius:19px; box-shadow:0 14px 28px rgba(0,0,0,.16); }
-        #bds-access-gate .bds-gate-brand h1 { font-size:clamp(29px,3vw,45px); line-height:1.14; letter-spacing:-.045em; margin:20px 0 14px; }
-        #bds-access-gate .bds-gate-brand p { color:#c1dde2; font-size:15px; line-height:1.7; }
-        #bds-access-gate .bds-gate-brand small { color:#9dbfc9; }
-        #bds-access-gate .bds-gate-form-side { padding:clamp(24px,3.7vw,44px); color:var(--bds-gate-ink); }
-        #bds-access-gate .bds-gate-eyebrow { font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; color:var(--bds-gate-teal); }
-        #bds-access-gate h2 { margin:9px 0 8px; font-size:clamp(24px,3vw,31px); letter-spacing:-.045em; }
-        #bds-access-gate .bds-gate-subtext { font-size:13px; color:#667b87; line-height:1.6; margin-bottom:23px; }
-        #bds-access-gate .bds-gate-field { display:block; margin:15px 0; font-size:12px; font-weight:700; color:#355060; }
-        #bds-access-gate .bds-gate-field input { width:100%; min-width:0; display:block; margin-top:7px; border:1.5px solid #cfdee2; border-radius:11px;
-            padding:13px 14px; font:inherit; font-size:15px; color:#123849; background:#fafcfc; transition:border-color .2s,box-shadow .2s,background .2s; }
-        #bds-access-gate .bds-gate-field input:focus { border-color:#147b78; background:#fff; outline:0; box-shadow:0 0 0 4px rgba(20,123,120,.12); }
-        #bds-access-gate .bds-gate-primary { border:0; width:100%; cursor:pointer; background:linear-gradient(110deg,#126e68,#1c817a); color:white;
-            border-radius:12px; font-size:14px; font-weight:750; padding:15px 17px; transition:transform .2s,box-shadow .2s; margin-top:8px; }
-        #bds-access-gate .bds-gate-primary:hover { transform:translateY(-2px); box-shadow:0 12px 23px rgba(19,110,103,.22); }
-        #bds-access-gate .bds-gate-primary:disabled { opacity:.65; cursor:wait; transform:none; }
-        #bds-access-gate .bds-gate-message { font-size:12px; min-height:30px; padding-top:12px; color:#a43a42; }
-        #bds-access-gate .bds-gate-foot { text-align:center; color:#7a8b96; font-size:11px; margin-top:16px; }
-        #bds-access-gate .bds-gate-config { padding-top:16px; border-top:1px solid #e1eaec; margin-top:18px; }
-        #bds-access-gate .bds-gate-textbtn { border:0; background:none; cursor:pointer; color:#176e72; font-size:12px; text-decoration:underline; }
-        #bds-access-gate .bds-gate-password-wrap { position:relative; }
-        #bds-access-gate .bds-gate-password-wrap input { padding-right:75px; }
-        #bds-access-gate .bds-gate-password-wrap button { position:absolute; right:8px; top:50%; transform:translateY(-50%); border:0; background:transparent; color:#176e72; cursor:pointer; font-weight:650; padding:8px; }
-        #bds-report-app .bds-connection-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
-        #bds-report-app .bds-connection-tools button { border:1px solid #c9dbe0; border-radius:9px; background:#f4f9f9; padding:9px 13px; color:#174758; cursor:pointer; font-weight:700; }
-        #bds-report-app #appsScriptUrl:disabled { color:#617781; background:#eaf0f1; cursor:not-allowed; }
-        #bds-report-app .bds-top-actions { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:14px; }
-        #bds-report-app .bds-top-actions button { border:1px solid rgba(255,255,255,.35); border-radius:10px; background:rgba(255,255,255,.12); color:#fff; padding:10px 14px; cursor:pointer; font-weight:700; }
-        @media(max-width:730px) {
-            #bds-access-gate .bds-gate-layout { grid-template-columns:minmax(0,1fr); max-width:490px; }
-            #bds-access-gate .bds-gate-brand { padding:20px 25px; gap:12px; }
-            #bds-access-gate .bds-gate-brand img { width:55px; height:55px; }
-            #bds-access-gate .bds-gate-brand h1 { font-size:23px; margin:4px 0; }
-            #bds-access-gate .bds-gate-brand p { font-size:12px; }
-            #bds-access-gate .bds-gate-brand small { display:none; }
-            #bds-access-gate .bds-gate-form-side { padding:25px; }
+        /* BDS ACCESS: one authoritative, scroll-safe, mobile-first design system. */
+        #bds-access-gate {
+            --bds-gate-ink:#153946; --bds-gate-cream:#f9f7f0; --bds-gate-teal:#176c63;
+            position:fixed; inset:0; z-index:10000; width:100%; min-height:0;
+            height:100vh; height:100dvh; overflow-x:hidden; overflow-y:auto;
+            overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+            display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start;
+            padding:clamp(12px,3vw,40px); background:#092e3b;
+            background-image:radial-gradient(ellipse at 7% 12%,rgba(51,146,139,.26),transparent 46%),
+              radial-gradient(ellipse at 92% 92%,rgba(203,156,88,.15),transparent 36%),
+              linear-gradient(125deg,#0b3544,#092937 75%);
+            font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+            isolation:isolate; color:var(--bds-gate-ink);
         }
-        @media(prefers-reduced-motion:reduce) { #bds-access-gate * { transition:none; animation:none; } }
+        #bds-access-gate, #bds-access-gate *, #bds-access-gate *::before, #bds-access-gate *::after {box-sizing:border-box;}
+        #bds-access-gate[hidden], #bds-report-app[hidden] {display:none;}
+        #bds-access-gate .bds-gate-layout {
+            margin:auto; width:min(1100px,100%); min-width:0; flex:none;
+            display:grid; grid-template-columns:minmax(0,1fr) minmax(0,465px);
+            border:1px solid rgba(247,252,247,.2); border-radius:clamp(18px,2.6vw,32px);
+            background:var(--bds-gate-cream); box-shadow:0 28px 86px rgba(1,17,24,.35);
+            overflow:clip; animation:bds-gate-arrive .62s cubic-bezier(.2,.8,.2,1) both;
+        }
+        #bds-access-gate .bds-gate-brand {
+            min-width:0; min-height:560px; color:#f1f8f5; position:relative;
+            padding:clamp(28px,4.1vw,60px); display:flex; flex-direction:column; justify-content:space-between; gap:26px;
+            background:radial-gradient(circle at 98% 22%,rgba(119,199,175,.14),transparent 39%),
+                linear-gradient(150deg,#0d3d4c,#092e3c 86%); isolation:isolate;
+        }
+        #bds-access-gate .bds-gate-brand::after {
+            content:""; position:absolute; inset:0; opacity:.2; z-index:-1; pointer-events:none;
+            background-image:linear-gradient(rgba(190,230,214,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(190,230,214,.22) 1px,transparent 1px);
+            background-size:44px 44px; mask-image:linear-gradient(115deg,transparent 10%,black 100%);
+        }
+        #bds-access-gate .bds-gate-brand-top {display:flex; align-items:center; gap:14px; min-width:0;}
+        #bds-access-gate .bds-gate-brand img {
+            width:72px; height:72px; object-fit:contain; flex:none; background:#fff; padding:8px;
+            border-radius:19px; box-shadow:0 14px 34px rgba(0,0,0,.17);
+        }
+        #bds-access-gate .bds-gate-wordmark {font-size:12px; font-weight:750; letter-spacing:.13em; text-transform:uppercase; color:#e4f3ef; line-height:1.6;}
+        #bds-access-gate .bds-gate-wordmark span {display:block; color:#a3cac6; font-size:10px; letter-spacing:.1em; font-weight:600;}
+        #bds-access-gate .bds-gate-hero {position:relative; max-width:480px;}
+        #bds-access-gate .bds-gate-overline {color:#caa86e; letter-spacing:.19em; font-size:11px; text-transform:uppercase; font-weight:800;}
+        #bds-access-gate .bds-gate-hero h1 {font-size:clamp(38px,4.6vw,61px); line-height:1.06; letter-spacing:-.055em; margin:17px 0 19px; font-weight:800;}
+        #bds-access-gate .bds-gate-hero h1 em {font-style:normal; color:#9ad6c7;}
+        #bds-access-gate .bds-gate-hero p {max-width:350px; font-size:14px; line-height:1.8; color:#c1d9d8;}
+        #bds-access-gate .bds-gate-signals {display:flex; flex-wrap:wrap; gap:8px; margin-top:30px;}
+        #bds-access-gate .bds-gate-signals span {display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:650; color:#e8f2ef; padding:9px 12px; border:1px solid rgba(201,236,224,.21); background:rgba(255,255,255,.065); border-radius:99px;}
+        #bds-access-gate .bds-gate-signals span::before {content:""; width:6px; height:6px; background:#a4dfc4; border-radius:50%; box-shadow:0 0 0 3px rgba(164,223,196,.1);}
+        #bds-access-gate .bds-gate-brand-footer {display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:11px; color:#a6c5c8; line-height:1.6;}
+        #bds-access-gate .bds-gate-brand-footer strong {font-size:10px; color:#c9a66b; letter-spacing:.12em;}
+        #bds-access-gate .bds-gate-form-side {min-width:0; padding:clamp(26px,4.1vw,54px); display:flex; flex-direction:column; justify-content:center; background:#fcfaf5;}
+        #bds-access-gate .bds-gate-eyebrow {display:inline-flex; align-self:flex-start; align-items:center; gap:8px; font-size:10px; letter-spacing:.17em; text-transform:uppercase; font-weight:800; color:#166c63;}
+        #bds-access-gate .bds-gate-eyebrow::before {content:""; width:18px; height:2px; background:#caa86e;}
+        #bds-access-gate h2 {font-size:clamp(29px,3vw,40px); line-height:1.15; letter-spacing:-.052em; margin:17px 0 10px; color:#143849;}
+        #bds-access-gate .bds-gate-subtext {font-size:13px; line-height:1.7; color:#657d83; margin-bottom:22px;}
+        #bds-access-gate .bds-gate-field {display:block; margin:0 0 15px; font-size:12px; color:#345360; font-weight:750;}
+        #bds-access-gate .bds-gate-field input {
+            width:100%; max-width:100%; min-width:0; display:block; margin-top:7px; min-height:49px;
+            font-family:inherit; font-size:14px; color:#163a47; background:#fff;
+            border:1px solid #d5e1df; border-radius:12px; padding:12px 15px;
+            transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+        }
+        #bds-access-gate .bds-gate-field input:hover {border-color:#9bbaaf;}
+        #bds-access-gate .bds-gate-field input:focus-visible {outline:none; border-color:#168274; box-shadow:0 0 0 4px rgba(29,125,110,.12);}
+        #bds-access-gate .bds-gate-field input::placeholder {color:#9baeb0;}
+        #bds-access-gate .bds-gate-password-wrap {position:relative;}
+        #bds-access-gate .bds-gate-password-wrap input {padding-right:77px;}
+        #bds-access-gate .bds-gate-password-wrap button {position:absolute; right:7px; top:calc(50% + 3px); transform:translateY(-50%); border:0; background:#ecf4f1; border-radius:8px; color:#17695f; cursor:pointer; font:inherit; font-weight:750; font-size:11px; padding:9px 12px; min-height:36px;}
+        #bds-access-gate .bds-gate-primary {
+            width:100%; min-height:51px; border:0; cursor:pointer; color:#fff;
+            font:inherit; font-size:14px; font-weight:800; letter-spacing:.005em;
+            border-radius:12px; padding:13px 17px; background:linear-gradient(112deg,#136960,#258677);
+            box-shadow:0 10px 22px rgba(17,104,94,.18);
+            transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+        }
+        #bds-access-gate .bds-gate-primary:hover {transform:translateY(-2px); box-shadow:0 14px 24px rgba(17,104,94,.24); filter:saturate(1.1);}
+        #bds-access-gate .bds-gate-primary:active {transform:translateY(0) scale(.99);}
+        #bds-access-gate .bds-gate-primary:disabled {opacity:.65; cursor:wait; box-shadow:none; transform:none;}
+        #bds-access-gate .bds-gate-message {font-size:12px; color:#aa3c46; line-height:1.5; min-height:0; margin-top:12px; overflow-wrap:anywhere;}
+        #bds-access-gate .bds-gate-message:empty {display:none;}
+        #bds-access-gate .bds-gate-foot {display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:10px; color:#879a9b; margin-top:20px;}
+        #bds-access-gate .bds-gate-foot::before {content:""; height:6px; width:6px; border-radius:50%; background:#258677; margin-right:2px;}
+        #bds-access-gate .bds-gate-foot span {margin-right:auto;}
+        #bds-access-gate button:focus-visible {outline:3px solid #cda56d; outline-offset:3px;}
+        #bds-report-app .bds-top-actions {display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:14px;}
+        #bds-report-app .bds-top-actions button {border:1px solid rgba(255,255,255,.35); border-radius:10px; background:rgba(255,255,255,.12); color:#fff; padding:10px 14px; cursor:pointer; font-weight:700;}
+        @keyframes bds-gate-arrive {from {opacity:0; transform:translateY(14px) scale(.99);} to {opacity:1; transform:translateY(0) scale(1);}}
+        @media (max-width:780px) {
+            #bds-access-gate {padding:12px;}
+            #bds-access-gate .bds-gate-layout {grid-template-columns:minmax(0,1fr); width:min(520px,100%); border-radius:20px;}
+            #bds-access-gate .bds-gate-brand {min-height:0; padding:21px 25px; gap:11px;}
+            #bds-access-gate .bds-gate-brand img {width:49px; height:49px; border-radius:12px; padding:5px;}
+            #bds-access-gate .bds-gate-wordmark {font-size:10px;}
+            #bds-access-gate .bds-gate-wordmark span {font-size:9px;}
+            #bds-access-gate .bds-gate-hero {display:none;}
+            #bds-access-gate .bds-gate-brand-footer {display:none;}
+            #bds-access-gate .bds-gate-form-side {padding:clamp(20px,5vw,31px);}
+            #bds-access-gate .bds-gate-field {margin-bottom:12px;}
+            #bds-access-gate .bds-gate-subtext {margin-bottom:19px;}
+        }
+        @media (max-width:380px) {
+            #bds-access-gate {padding:8px;}
+            #bds-access-gate .bds-gate-brand {padding:16px 18px;}
+            #bds-access-gate .bds-gate-form-side {padding:19px 17px;}
+            #bds-access-gate h2 {font-size:27px; margin:11px 0 8px;}
+            #bds-access-gate .bds-gate-field input {min-height:46px;}
+        }
+        @media (max-height:610px) and (min-width:781px) {
+            #bds-access-gate .bds-gate-brand {min-height:0;}
+            #bds-access-gate .bds-gate-hero h1 {font-size:38px;}
+            #bds-access-gate .bds-gate-brand, #bds-access-gate .bds-gate-form-side {padding:27px 35px;}
+        }
+        @media (prefers-reduced-motion:reduce) {
+            #bds-access-gate *, #bds-access-gate *::before, #bds-access-gate *::after {animation:none; transition:none; scroll-behavior:auto;}
+        }
 </style>
 </head>
 <body class="bds-page">
@@ -1171,9 +1240,19 @@
     <section id="bds-access-gate" aria-label="BDS staff sign in">
       <div class="bds-gate-layout">
         <div class="bds-gate-brand">
-          <div><img src="images/BDS-Logo.png" alt="BDS school logo"><h1>One school.<br>One connected workspace.</h1>
-          <p>Welcome to the BDS Report Card System. A reliable academic workspace for authorized school staff.</p></div>
-          <small>GGHS Benazir District School, Nawabshah-1</small>
+          <div class="bds-gate-brand-top">
+            <img src="images/BDS-Logo.png" alt="BDS school logo" width="72" height="72">
+            <div class="bds-gate-wordmark">BDS REPORT CARD <span>GGHS BENAZIR DISTRICT SCHOOL</span></div>
+          </div>
+          <div class="bds-gate-hero">
+            <div class="bds-gate-overline">THE ACADEMIC WORKSPACE</div>
+            <h1>Clarity in every <em>student story.</em></h1>
+            <p>One thoughtful place for assessment, academic progress and the school records that matter.</p>
+            <div class="bds-gate-signals" aria-label="System capabilities">
+              <span>Student records</span><span>Assessment</span><span>Report cards</span>
+            </div>
+          </div>
+          <div class="bds-gate-brand-footer"><span>GGHS Benazir District School, Nawabshah-1</span><strong>BDS / ACCESS</strong></div>
         </div>
         <div class="bds-gate-form-side">
           <div class="bds-gate-eyebrow">BDS STAFF ACCESS</div>
@@ -1186,15 +1265,8 @@
             <button class="bds-gate-primary" id="bdsLoginButton" type="submit">Sign in to BDS &rarr;</button>
           </form>
           <div class="bds-gate-message" role="alert" id="bdsLoginMessage"></div>
-          <div class="bds-gate-config" id="bdsGateConnection">
-            <button id="bdsShowSetup" class="bds-gate-textbtn" type="button">Connection setup for school owner</button>
-            <div id="bdsFirstSetup" hidden>
-              <label class="bds-gate-field">Production Apps Script URL<input id="bdsSetupUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"></label>
-              <button type="button" class="bds-gate-primary" id="bdsVerifySetup">Verify, Save &amp; Lock URL</button>
-              <p class="bds-gate-subtext">This saves the URL on this browser. Other devices need the centrally deployed endpoint configured separately.</p>
-            </div>
-          </div>
-          <div class="bds-gate-foot">Authorized school staff only</div>
+
+          <div class="bds-gate-foot"><span>Authorized school staff only</span><span>SECURE ACCESS</span></div>
         </div>
       </div>
     </section>
@@ -1224,14 +1296,12 @@
 <!-- ============================================= -->
 
 
-        <!-- Apps Script URL Configuration -->
-        <div class="url-section">
-            <label class="url-label" for="appsScriptUrl">🔗 Google Apps Script URL</label>
+        <!-- Connection is centrally configured by the website publisher in index.html. -->
+        <div class="url-section" aria-label="BDS backend connection status">
             <div class="url-input-group">
-                <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" value="" disabled aria-label="Locked Apps Script connection">
-                <span id="connectionStatus" class="status-badge status-disconnected">Not Configured</span>
+                <span class="url-label">🔗 School database connection</span>
+                <span id="connectionStatus" class="status-badge status-disconnected" role="status" aria-live="polite">Not Configured</span>
             </div>
-            <div class="bds-connection-tools"><button id="bdsEditEndpoint" type="button" onclick="bdsEditEndpoint()">Edit connection (owner)</button><button type="button" id="bdsSaveEndpoint" onclick="bdsSaveEndpoint()" hidden>Verify, Save &amp; Lock</button><span id="bdsEndpointHelp" role="status" aria-live="polite">Saved URL is locked against accidental changes.</span></div>
         </div>
 
         <div id="bdsSyncStatus" class="bds-sync-state" data-state="offline" role="status" aria-live="polite">Not synchronized. Select Fetch All to load current Google Sheets data.</div>
@@ -1612,9 +1682,9 @@
         }
 
         // Per-deployment cache. Never import prior database records implicitly.
-        const BDS_CACHE_PREFIX = 'bds_report_v210_';
+        const BDS_CACHE_PREFIX = 'bds_report_v212_';
         function bdsCacheKey(type = 'students') {
-            const url = document.getElementById('appsScriptUrl').value.trim();
+            const url = bdsCurrentEndpoint();
             if (!url) return BDS_CACHE_PREFIX + 'unconfigured_' + type;
             let hash = 2166136261;
             for (let i = 0; i < url.length; i++) {
@@ -1723,117 +1793,33 @@ function debounceCheck() {
         };
 
 
-        // Owner configuration is locally locked. GitHub Pages cannot automatically publish
-        // one browser's saved URL to every other teacher's browser. For fleet deployment,
-        // the administrator may place the approved /exec URL in this existing HTML variable.
-        const BDS_DEPLOYED_ENDPOINT = '';
-        const BDS_ENDPOINT_KEY = 'bds_owner_endpoint_v210';
-        const BDS_INSTANCE_KEY = 'bds_owner_instance_v210';
+        // SINGLE SCHOOL-WIDE CONNECTION SOURCE (configure before publishing to GitHub Pages).
+        // Paste the Apps Script production URL ending in /exec below. Do not put credentials here.
+        // This public endpoint address is not a secret; access is enforced by Apps Script.
+        const BDS_DEPLOYED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyun1pt2upo5lEl-5-rIUveoZCzmnLOHTAwFyRYDmiYDyg33lKikMjl0b0rIfiIemUegw/exec';
         let bdsSessionToken = '';
-        let bdsEndpointEditing = false;
         function bdsValidEndpoint(value) {
             try { const url = new URL(value); return url.protocol === 'https:' &&
                 url.hostname === 'script.google.com' && /^\/macros\/s\/[^/]+\/exec$/.test(url.pathname) && !url.search && !url.hash; }
             catch (_) { return false; }
         }
-        function bdsCurrentEndpoint() { return document.getElementById('appsScriptUrl').value.trim(); }
-        function bdsSetEndpoint(url) {
-            const field = document.getElementById('appsScriptUrl');
-            field.value = url; field.disabled = true;
-            bdsEndpointEditing = false;
-            document.getElementById('bdsSaveEndpoint').hidden = true;
-            document.getElementById('bdsEditEndpoint').hidden = false;
-        }
+        function bdsCurrentEndpoint() { return bdsValidEndpoint(BDS_DEPLOYED_ENDPOINT) ? BDS_DEPLOYED_ENDPOINT : ''; }
         function bdsInitializeAccess() {
-            try { Object.keys(localStorage).filter(k => /^bds_report_v20/.test(k)).forEach(k => localStorage.removeItem(k)); } catch (_) {}
-            let endpoint = BDS_DEPLOYED_ENDPOINT;
-            try { endpoint = localStorage.getItem(BDS_ENDPOINT_KEY) || endpoint; } catch (_) {}
-            if (bdsValidEndpoint(endpoint)) bdsSetEndpoint(endpoint);
+            // Discard legacy device-specific configuration; it must never override the deployed URL.
+            try {
+                localStorage.removeItem('bds_owner_endpoint_v210');
+                localStorage.removeItem('bds_owner_instance_v210');
+                Object.keys(localStorage).filter(k => /^bds_report_v20/.test(k)).forEach(k => localStorage.removeItem(k));
+            } catch (_) {}
             document.getElementById('bdsLoginForm').addEventListener('submit', bdsLogin);
-            document.getElementById('bdsShowSetup').addEventListener('click', () => {
-                document.getElementById('bdsFirstSetup').hidden = !document.getElementById('bdsFirstSetup').hidden;
-            });
-            document.getElementById('bdsVerifySetup').addEventListener('click', bdsInitialEndpoint);
             document.getElementById('bdsRevealPassword').addEventListener('click', () => {
                 const field = document.getElementById('bdsLoginPassword');
                 field.type = field.type === 'password' ? 'text' : 'password';
                 document.getElementById('bdsRevealPassword').textContent = field.type === 'password' ? 'Show' : 'Hide';
             });
-            document.getElementById('bdsLoginMessage').textContent = endpoint ? '' : 'The school owner must configure the Apps Script endpoint first.';
-            document.getElementById('bdsGateConnection').hidden = bdsValidEndpoint(endpoint);
+            document.getElementById('bdsLoginMessage').textContent = bdsCurrentEndpoint() ? '' :
+                'Connection is not configured. The website owner must publish a valid Apps Script /exec URL in index.html.';
             // Session token is intentionally not persisted across browser restarts or refreshes.
-        }
-        async function bdsPingEndpoint(candidate) {
-            if (!bdsValidEndpoint(candidate)) throw new Error('Use a production Google Apps Script URL ending in /exec.');
-            const current = bdsCurrentEndpoint();
-            document.getElementById('appsScriptUrl').value = candidate;
-            try {
-                const result = await jsonpRequest({ action: 'ping' }, 12000);
-                if (!result || !result.success || result.application !== 'BDS Report Card System' || !/^2\.1\./.test(String(result.version)) || !/^[a-f0-9]{64}$/.test(String(result.instanceId || '')))
-                    throw new Error('This endpoint is not a compatible BDS 2.1 backend.');
-                return result;
-            } finally { document.getElementById('appsScriptUrl').value = current; }
-        }
-        async function bdsInitialEndpoint() {
-            if (bdsValidEndpoint(bdsCurrentEndpoint())) return; // Existing endpoint can be edited only after owner unlock.
-            const url = document.getElementById('bdsSetupUrl').value.trim();
-            const status = document.getElementById('bdsLoginMessage');
-            status.textContent = 'Verifying endpoint...';
-            try {
-                const ping = await bdsPingEndpoint(url);
-                localStorage.setItem(BDS_INSTANCE_KEY, ping.instanceId);
-                localStorage.setItem(BDS_ENDPOINT_KEY, url);
-                bdsSetEndpoint(url);
-                document.getElementById('bdsFirstSetup').hidden = true;
-                document.getElementById('bdsGateConnection').hidden = true;
-                status.textContent = 'Connection verified and locked on this browser. You can now sign in.';
-            } catch (error) { status.textContent = error.message; }
-        }
-        async function bdsEditEndpoint() {
-            if (!bdsSessionToken) { bdsRequireLogin(); return; }
-            const passphrase = window.prompt('School owner connection passphrase (not the shared staff password):');
-            if (passphrase === null) return;
-            const help = document.getElementById('bdsEndpointHelp');
-            help.textContent = 'Verifying owner authorization...';
-            try {
-                const requestId = 'bds-login-' + crypto.randomUUID();
-                const url = bdsCurrentEndpoint();
-                await fetch(url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=UTF-8'},
-                    body:JSON.stringify({action:'ownerUnlock',requestId,passphrase})});
-                let status;
-                for (let i=0;i<18;i++) {
-                    await new Promise(resolve => setTimeout(resolve,850));
-                    status = await jsonpRequest({action:'loginStatus',requestId});
-                    if (!status.pending) break;
-                }
-                if (!status || !status.ownerAuthorized) throw new Error((status && status.error) || 'Owner verification was not confirmed.');
-                document.getElementById('appsScriptUrl').disabled = false;
-                document.getElementById('bdsSaveEndpoint').hidden = false;
-                document.getElementById('bdsEditEndpoint').hidden = true;
-                bdsEndpointEditing = true;
-                help.textContent = 'Owner authorized. Enter a replacement, then verify and lock it.';
-            } catch(error) { help.textContent = error.message; }
-        }
-        async function bdsSaveEndpoint() {
-            if (!bdsEndpointEditing || !bdsSessionToken) return;
-            const field = document.getElementById('appsScriptUrl');
-            const candidate = field.value.trim();
-            const old = bdsEndpointEditing ? (localStorage.getItem(BDS_ENDPOINT_KEY) || BDS_DEPLOYED_ENDPOINT || '') : bdsCurrentEndpoint();
-            const help = document.getElementById('bdsEndpointHelp');
-            try {
-                const ping = await bdsPingEndpoint(candidate);
-                const trustedInstance = localStorage.getItem(BDS_INSTANCE_KEY);
-                if (trustedInstance && ping.instanceId !== trustedInstance) throw new Error('Replacement belongs to a different BDS database. Existing URL retained.');
-                localStorage.setItem(BDS_INSTANCE_KEY, ping.instanceId);
-                localStorage.setItem(BDS_ENDPOINT_KEY, candidate);
-                bdsSetEndpoint(candidate);
-                if (old !== candidate) { bdsSessionToken = ''; bdsRequireLogin(); }
-                help.textContent = 'Verified connection saved and locked on this browser.';
-                await checkConnection();
-            } catch (error) {
-                bdsSetEndpoint(old);
-                help.textContent = 'Replacement rejected; previously working URL retained. ' + error.message;
-            }
         }
         async function bdsLogin(event) {
             event.preventDefault();
@@ -1903,9 +1889,9 @@ function debounceCheck() {
             }[character]));
         }
 
-        function jsonpRequest(params, timeoutMs = 15000) {
-            const baseUrl = document.getElementById('appsScriptUrl').value.trim();
-            if (!baseUrl) return Promise.reject(new Error('Enter your Google Apps Script URL first.'));
+        function jsonpRequest(params, timeoutMs = 15000, endpointOverride = '') {
+            const baseUrl = endpointOverride || bdsCurrentEndpoint();
+            if (!baseUrl) return Promise.reject(new Error('The school backend URL is not configured in index.html. Contact the website owner.'));
             return new Promise((resolve, reject) => {
                 const callbackName = 'bds_jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
                 const publicAction = ['ping', 'loginStatus'].includes(String(params.action || ''));
@@ -1940,8 +1926,8 @@ function debounceCheck() {
 
         let bdsPendingWrite = null;
         async function apiPost(payload) {
-            const baseUrl = document.getElementById('appsScriptUrl').value.trim();
-            if (!baseUrl) throw new Error('Enter your Google Apps Script URL first.');
+            const baseUrl = bdsCurrentEndpoint();
+            if (!baseUrl) throw new Error('The school backend URL is not configured in index.html. Contact the website owner.');
             const payloadText = JSON.stringify(payload);
             if (bdsPendingWrite && (bdsPendingWrite.url !== baseUrl || bdsPendingWrite.payloadText !== payloadText)) {
                 throw new Error('An earlier save has an unknown outcome. Check its status before submitting a different operation.');
@@ -2141,7 +2127,7 @@ function debounceCheck() {
         // CHECK CONNECTION
         // =============================================
         async function checkConnection() {
-            const url = document.getElementById('appsScriptUrl').value.trim();
+            const url = bdsCurrentEndpoint();
             const statusEl = document.getElementById('connectionStatus');
             if (!url) {
                 statusEl.textContent = 'Not Configured';
@@ -2205,7 +2191,7 @@ function closeDuplicateModal() {
         // =============================================
 
         async function checkDuplicateRollNumber(rollNumber) {
-            const url = document.getElementById('appsScriptUrl').value.trim();
+            const url = bdsCurrentEndpoint();
             if (!url || !String(rollNumber || '').trim()) return { isDuplicate: false };
             try {
                 return await jsonpRequest({
@@ -2277,7 +2263,7 @@ function hideSaveLoading() {
         // =============================================
 
         async function saveOrUpdate() {
-            const url = document.getElementById('appsScriptUrl').value.trim();
+            const url = bdsCurrentEndpoint();
             if (!url) { showMessage('Please enter your Google Apps Script URL first.', 'error'); return; }
             if (isEditMode && bdsIsOffline) { showMessage('Fetch current Google Sheets records before updating an existing student.', 'error'); return; }
             const required = ['studentName', 'fatherName', 'studentClass', 'rollNumber'];
