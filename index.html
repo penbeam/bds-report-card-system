@@ -1116,14 +1116,94 @@
         @media (prefers-reduced-motion:reduce) {
             #bds-report-app *, #bds-report-app *::before, #bds-report-app *::after { animation-duration:.01ms; animation-iteration-count:1; transition-duration:.01ms; scroll-behavior:auto; }
         }
+
+        /* BDS shared staff access and connection settings, authoritative scoped styles */
+        #bds-access-gate { --bds-gate-ink:#123849; --bds-gate-teal:#136e67; position:fixed; inset:0; z-index:10000;
+            overflow-y:auto; background:radial-gradient(ellipse at 5% 5%,#286b78 0%,transparent 43%),linear-gradient(135deg,#0e2d3f,#174758 68%,#103445);
+            display:grid; place-items:center; padding:clamp(15px,3.5vw,48px); font-family:Inter,"Segoe UI",Arial,sans-serif; }
+        #bds-access-gate[hidden], #bds-report-app[hidden] { display:none; }
+        #bds-access-gate .bds-gate-layout { width:min(990px,100%); display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,440px);
+            overflow:hidden; border:1px solid rgba(255,255,255,.16); border-radius:27px; box-shadow:0 35px 110px rgba(0,0,0,.25); background:#fff; }
+        #bds-access-gate .bds-gate-brand { color:white; padding:clamp(30px,5vw,65px); display:flex; flex-direction:column; justify-content:space-between;
+            background:radial-gradient(circle at 85% 4%,rgba(125,225,205,.23),transparent 40%),linear-gradient(165deg,#123a4e,#0e2d3f); }
+        #bds-access-gate .bds-gate-brand img { width:82px; height:82px; object-fit:contain; background:white; padding:8px; border-radius:19px; box-shadow:0 14px 28px rgba(0,0,0,.16); }
+        #bds-access-gate .bds-gate-brand h1 { font-size:clamp(29px,3vw,45px); line-height:1.14; letter-spacing:-.045em; margin:20px 0 14px; }
+        #bds-access-gate .bds-gate-brand p { color:#c1dde2; font-size:15px; line-height:1.7; }
+        #bds-access-gate .bds-gate-brand small { color:#9dbfc9; }
+        #bds-access-gate .bds-gate-form-side { padding:clamp(24px,3.7vw,44px); color:var(--bds-gate-ink); }
+        #bds-access-gate .bds-gate-eyebrow { font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; color:var(--bds-gate-teal); }
+        #bds-access-gate h2 { margin:9px 0 8px; font-size:clamp(24px,3vw,31px); letter-spacing:-.045em; }
+        #bds-access-gate .bds-gate-subtext { font-size:13px; color:#667b87; line-height:1.6; margin-bottom:23px; }
+        #bds-access-gate .bds-gate-field { display:block; margin:15px 0; font-size:12px; font-weight:700; color:#355060; }
+        #bds-access-gate .bds-gate-field input { width:100%; min-width:0; display:block; margin-top:7px; border:1.5px solid #cfdee2; border-radius:11px;
+            padding:13px 14px; font:inherit; font-size:15px; color:#123849; background:#fafcfc; transition:border-color .2s,box-shadow .2s,background .2s; }
+        #bds-access-gate .bds-gate-field input:focus { border-color:#147b78; background:#fff; outline:0; box-shadow:0 0 0 4px rgba(20,123,120,.12); }
+        #bds-access-gate .bds-gate-primary { border:0; width:100%; cursor:pointer; background:linear-gradient(110deg,#126e68,#1c817a); color:white;
+            border-radius:12px; font-size:14px; font-weight:750; padding:15px 17px; transition:transform .2s,box-shadow .2s; margin-top:8px; }
+        #bds-access-gate .bds-gate-primary:hover { transform:translateY(-2px); box-shadow:0 12px 23px rgba(19,110,103,.22); }
+        #bds-access-gate .bds-gate-primary:disabled { opacity:.65; cursor:wait; transform:none; }
+        #bds-access-gate .bds-gate-message { font-size:12px; min-height:30px; padding-top:12px; color:#a43a42; }
+        #bds-access-gate .bds-gate-foot { text-align:center; color:#7a8b96; font-size:11px; margin-top:16px; }
+        #bds-access-gate .bds-gate-config { padding-top:16px; border-top:1px solid #e1eaec; margin-top:18px; }
+        #bds-access-gate .bds-gate-textbtn { border:0; background:none; cursor:pointer; color:#176e72; font-size:12px; text-decoration:underline; }
+        #bds-access-gate .bds-gate-password-wrap { position:relative; }
+        #bds-access-gate .bds-gate-password-wrap input { padding-right:75px; }
+        #bds-access-gate .bds-gate-password-wrap button { position:absolute; right:8px; top:50%; transform:translateY(-50%); border:0; background:transparent; color:#176e72; cursor:pointer; font-weight:650; padding:8px; }
+        #bds-report-app .bds-connection-tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; }
+        #bds-report-app .bds-connection-tools button { border:1px solid #c9dbe0; border-radius:9px; background:#f4f9f9; padding:9px 13px; color:#174758; cursor:pointer; font-weight:700; }
+        #bds-report-app #appsScriptUrl:disabled { color:#617781; background:#eaf0f1; cursor:not-allowed; }
+        #bds-report-app .bds-top-actions { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+        #bds-report-app .bds-top-actions button { border:1px solid rgba(255,255,255,.35); border-radius:10px; background:rgba(255,255,255,.12); color:#fff; padding:10px 14px; cursor:pointer; font-weight:700; }
+        @media(max-width:730px) {
+            #bds-access-gate .bds-gate-layout { grid-template-columns:minmax(0,1fr); max-width:490px; }
+            #bds-access-gate .bds-gate-brand { padding:20px 25px; gap:12px; }
+            #bds-access-gate .bds-gate-brand img { width:55px; height:55px; }
+            #bds-access-gate .bds-gate-brand h1 { font-size:23px; margin:4px 0; }
+            #bds-access-gate .bds-gate-brand p { font-size:12px; }
+            #bds-access-gate .bds-gate-brand small { display:none; }
+            #bds-access-gate .bds-gate-form-side { padding:25px; }
+        }
+        @media(prefers-reduced-motion:reduce) { #bds-access-gate * { transition:none; animation:none; } }
 </style>
 </head>
 <body class="bds-page">
-    <div class="container" id="bds-report-app">
+
+    <section id="bds-access-gate" aria-label="BDS staff sign in">
+      <div class="bds-gate-layout">
+        <div class="bds-gate-brand">
+          <div><img src="images/BDS-Logo.png" alt="BDS school logo"><h1>One school.<br>One connected workspace.</h1>
+          <p>Welcome to the BDS Report Card System. A reliable academic workspace for authorized school staff.</p></div>
+          <small>GGHS Benazir District School, Nawabshah-1</small>
+        </div>
+        <div class="bds-gate-form-side">
+          <div class="bds-gate-eyebrow">BDS STAFF ACCESS</div>
+          <h2>Welcome back</h2>
+          <p class="bds-gate-subtext">Sign in using the shared school credentials configured by the spreadsheet owner.</p>
+          <form id="bdsLoginForm" autocomplete="on">
+            <label class="bds-gate-field">Username<input id="bdsLoginUsername" type="text" autocomplete="username" required maxlength="64" placeholder="Shared staff username"></label>
+            <label class="bds-gate-field">Email address<input id="bdsLoginEmail" type="email" autocomplete="email" required placeholder="School email address"></label>
+            <label class="bds-gate-field">Password<div class="bds-gate-password-wrap"><input id="bdsLoginPassword" type="password" autocomplete="current-password" required placeholder="Enter shared password"><button id="bdsRevealPassword" type="button" aria-label="Show password">Show</button></div></label>
+            <button class="bds-gate-primary" id="bdsLoginButton" type="submit">Sign in to BDS &rarr;</button>
+          </form>
+          <div class="bds-gate-message" role="alert" id="bdsLoginMessage"></div>
+          <div class="bds-gate-config" id="bdsGateConnection">
+            <button id="bdsShowSetup" class="bds-gate-textbtn" type="button">Connection setup for school owner</button>
+            <div id="bdsFirstSetup" hidden>
+              <label class="bds-gate-field">Production Apps Script URL<input id="bdsSetupUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"></label>
+              <button type="button" class="bds-gate-primary" id="bdsVerifySetup">Verify, Save &amp; Lock URL</button>
+              <p class="bds-gate-subtext">This saves the URL on this browser. Other devices need the centrally deployed endpoint configured separately.</p>
+            </div>
+          </div>
+          <div class="bds-gate-foot">Authorized school staff only</div>
+        </div>
+      </div>
+    </section>
+    <div class="container" id="bds-report-app" hidden>
         <!-- Header -->
         <div class="header">
             <h1>GGHS BENAZIR DISTRICT SCHOOL NAWABSHAH-1</h1>
             <p>Under the Management of SZABIST Zab-ed</p>
+            <div class="bds-top-actions"><button type="button" onclick="bdsLogout()">Sign out</button></div>
         </div>
 
 <!-- BDS professional support panel -->
@@ -1148,9 +1228,10 @@
         <div class="url-section">
             <label class="url-label" for="appsScriptUrl">🔗 Google Apps Script URL</label>
             <div class="url-input-group">
-                <input type="text" id="appsScriptUrl" onchange="bdsHandleEndpointChange()" placeholder="https://script.google.com/macros/s/.../exec" onblur="checkConnection()" value="">
-                <span id="connectionStatus" class="status-badge status-disconnected">🔴 Not Configured</span>
+                <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" value="" disabled aria-label="Locked Apps Script connection">
+                <span id="connectionStatus" class="status-badge status-disconnected">Not Configured</span>
             </div>
+            <div class="bds-connection-tools"><button id="bdsEditEndpoint" type="button" onclick="bdsEditEndpoint()">Edit connection (owner)</button><button type="button" id="bdsSaveEndpoint" onclick="bdsSaveEndpoint()" hidden>Verify, Save &amp; Lock</button><span id="bdsEndpointHelp" role="status" aria-live="polite">Saved URL is locked against accidental changes.</span></div>
         </div>
 
         <div id="bdsSyncStatus" class="bds-sync-state" data-state="offline" role="status" aria-live="polite">Not synchronized. Select Fetch All to load current Google Sheets data.</div>
@@ -1531,7 +1612,7 @@
         }
 
         // Per-deployment cache. Never import prior database records implicitly.
-        const BDS_CACHE_PREFIX = 'bds_report_v206_';
+        const BDS_CACHE_PREFIX = 'bds_report_v210_';
         function bdsCacheKey(type = 'students') {
             const url = document.getElementById('appsScriptUrl').value.trim();
             if (!url) return BDS_CACHE_PREFIX + 'unconfigured_' + type;
@@ -1542,15 +1623,8 @@
             }
             return BDS_CACHE_PREFIX + (hash >>> 0).toString(36) + '_' + type;
         }
-        function bdsReadCache(type) {
-            try { const data = JSON.parse(localStorage.getItem(bdsCacheKey(type)) || 'null');
-                return data && Array.isArray(data.records) ? data : null;
-            } catch (_) { return null; }
-        }
-        function bdsWriteCache(type, records) {
-            try { localStorage.setItem(bdsCacheKey(type), JSON.stringify({ records, fetchedAt: new Date().toISOString() })); }
-            catch (error) { console.warn('BDS cache unavailable:', error.message); }
-        }
+        function bdsReadCache(type) { return null; }
+        function bdsWriteCache(type, records) { /* Deliberately avoid persistent student-data caching. */ }
         let bdsAuthoritativeStudents = [];
         let bdsLastServerSync = '';
         let bdsIsOffline = true;
@@ -1643,15 +1717,182 @@ function debounceCheck() {
         // =============================================
         window.onload = async function() {
             initializeStorage();
-            bdsRestoreOfflineData();
-            await loadSubjectCatalogue();
-            loadSubjects();
-            await checkConnection();
+            bdsInitializeAccess();
             showPreview();
             updateDashboardMetrics();
-            console.log('BDS Report Card System initialized');
         };
 
+
+        // Owner configuration is locally locked. GitHub Pages cannot automatically publish
+        // one browser's saved URL to every other teacher's browser. For fleet deployment,
+        // the administrator may place the approved /exec URL in this existing HTML variable.
+        const BDS_DEPLOYED_ENDPOINT = '';
+        const BDS_ENDPOINT_KEY = 'bds_owner_endpoint_v210';
+        const BDS_INSTANCE_KEY = 'bds_owner_instance_v210';
+        let bdsSessionToken = '';
+        let bdsEndpointEditing = false;
+        function bdsValidEndpoint(value) {
+            try { const url = new URL(value); return url.protocol === 'https:' &&
+                url.hostname === 'script.google.com' && /^\/macros\/s\/[^/]+\/exec$/.test(url.pathname) && !url.search && !url.hash; }
+            catch (_) { return false; }
+        }
+        function bdsCurrentEndpoint() { return document.getElementById('appsScriptUrl').value.trim(); }
+        function bdsSetEndpoint(url) {
+            const field = document.getElementById('appsScriptUrl');
+            field.value = url; field.disabled = true;
+            bdsEndpointEditing = false;
+            document.getElementById('bdsSaveEndpoint').hidden = true;
+            document.getElementById('bdsEditEndpoint').hidden = false;
+        }
+        function bdsInitializeAccess() {
+            try { Object.keys(localStorage).filter(k => /^bds_report_v20/.test(k)).forEach(k => localStorage.removeItem(k)); } catch (_) {}
+            let endpoint = BDS_DEPLOYED_ENDPOINT;
+            try { endpoint = localStorage.getItem(BDS_ENDPOINT_KEY) || endpoint; } catch (_) {}
+            if (bdsValidEndpoint(endpoint)) bdsSetEndpoint(endpoint);
+            document.getElementById('bdsLoginForm').addEventListener('submit', bdsLogin);
+            document.getElementById('bdsShowSetup').addEventListener('click', () => {
+                document.getElementById('bdsFirstSetup').hidden = !document.getElementById('bdsFirstSetup').hidden;
+            });
+            document.getElementById('bdsVerifySetup').addEventListener('click', bdsInitialEndpoint);
+            document.getElementById('bdsRevealPassword').addEventListener('click', () => {
+                const field = document.getElementById('bdsLoginPassword');
+                field.type = field.type === 'password' ? 'text' : 'password';
+                document.getElementById('bdsRevealPassword').textContent = field.type === 'password' ? 'Show' : 'Hide';
+            });
+            document.getElementById('bdsLoginMessage').textContent = endpoint ? '' : 'The school owner must configure the Apps Script endpoint first.';
+            document.getElementById('bdsGateConnection').hidden = bdsValidEndpoint(endpoint);
+            // Session token is intentionally not persisted across browser restarts or refreshes.
+        }
+        async function bdsPingEndpoint(candidate) {
+            if (!bdsValidEndpoint(candidate)) throw new Error('Use a production Google Apps Script URL ending in /exec.');
+            const current = bdsCurrentEndpoint();
+            document.getElementById('appsScriptUrl').value = candidate;
+            try {
+                const result = await jsonpRequest({ action: 'ping' }, 12000);
+                if (!result || !result.success || result.application !== 'BDS Report Card System' || !/^2\.1\./.test(String(result.version)) || !/^[a-f0-9]{64}$/.test(String(result.instanceId || '')))
+                    throw new Error('This endpoint is not a compatible BDS 2.1 backend.');
+                return result;
+            } finally { document.getElementById('appsScriptUrl').value = current; }
+        }
+        async function bdsInitialEndpoint() {
+            if (bdsValidEndpoint(bdsCurrentEndpoint())) return; // Existing endpoint can be edited only after owner unlock.
+            const url = document.getElementById('bdsSetupUrl').value.trim();
+            const status = document.getElementById('bdsLoginMessage');
+            status.textContent = 'Verifying endpoint...';
+            try {
+                const ping = await bdsPingEndpoint(url);
+                localStorage.setItem(BDS_INSTANCE_KEY, ping.instanceId);
+                localStorage.setItem(BDS_ENDPOINT_KEY, url);
+                bdsSetEndpoint(url);
+                document.getElementById('bdsFirstSetup').hidden = true;
+                document.getElementById('bdsGateConnection').hidden = true;
+                status.textContent = 'Connection verified and locked on this browser. You can now sign in.';
+            } catch (error) { status.textContent = error.message; }
+        }
+        async function bdsEditEndpoint() {
+            if (!bdsSessionToken) { bdsRequireLogin(); return; }
+            const passphrase = window.prompt('School owner connection passphrase (not the shared staff password):');
+            if (passphrase === null) return;
+            const help = document.getElementById('bdsEndpointHelp');
+            help.textContent = 'Verifying owner authorization...';
+            try {
+                const requestId = 'bds-login-' + crypto.randomUUID();
+                const url = bdsCurrentEndpoint();
+                await fetch(url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=UTF-8'},
+                    body:JSON.stringify({action:'ownerUnlock',requestId,passphrase})});
+                let status;
+                for (let i=0;i<18;i++) {
+                    await new Promise(resolve => setTimeout(resolve,850));
+                    status = await jsonpRequest({action:'loginStatus',requestId});
+                    if (!status.pending) break;
+                }
+                if (!status || !status.ownerAuthorized) throw new Error((status && status.error) || 'Owner verification was not confirmed.');
+                document.getElementById('appsScriptUrl').disabled = false;
+                document.getElementById('bdsSaveEndpoint').hidden = false;
+                document.getElementById('bdsEditEndpoint').hidden = true;
+                bdsEndpointEditing = true;
+                help.textContent = 'Owner authorized. Enter a replacement, then verify and lock it.';
+            } catch(error) { help.textContent = error.message; }
+        }
+        async function bdsSaveEndpoint() {
+            if (!bdsEndpointEditing || !bdsSessionToken) return;
+            const field = document.getElementById('appsScriptUrl');
+            const candidate = field.value.trim();
+            const old = bdsEndpointEditing ? (localStorage.getItem(BDS_ENDPOINT_KEY) || BDS_DEPLOYED_ENDPOINT || '') : bdsCurrentEndpoint();
+            const help = document.getElementById('bdsEndpointHelp');
+            try {
+                const ping = await bdsPingEndpoint(candidate);
+                const trustedInstance = localStorage.getItem(BDS_INSTANCE_KEY);
+                if (trustedInstance && ping.instanceId !== trustedInstance) throw new Error('Replacement belongs to a different BDS database. Existing URL retained.');
+                localStorage.setItem(BDS_INSTANCE_KEY, ping.instanceId);
+                localStorage.setItem(BDS_ENDPOINT_KEY, candidate);
+                bdsSetEndpoint(candidate);
+                if (old !== candidate) { bdsSessionToken = ''; bdsRequireLogin(); }
+                help.textContent = 'Verified connection saved and locked on this browser.';
+                await checkConnection();
+            } catch (error) {
+                bdsSetEndpoint(old);
+                help.textContent = 'Replacement rejected; previously working URL retained. ' + error.message;
+            }
+        }
+        async function bdsLogin(event) {
+            event.preventDefault();
+            const message = document.getElementById('bdsLoginMessage');
+            const button = document.getElementById('bdsLoginButton');
+            const url = bdsCurrentEndpoint();
+            if (!bdsValidEndpoint(url)) { message.textContent = 'Ask the school owner to configure the backend connection.'; return; }
+            const requestId = 'bds-login-' + crypto.randomUUID();
+            button.disabled = true; message.textContent = 'Verifying your credentials...';
+            try {
+                await fetch(url, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+                    body: JSON.stringify({ action:'login', requestId,
+                        username:document.getElementById('bdsLoginUsername').value.trim(),
+                        email:document.getElementById('bdsLoginEmail').value.trim(),
+                        password:document.getElementById('bdsLoginPassword').value }) });
+                let result = null;
+                for (let i=0; i<18; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 850));
+                    result = await jsonpRequest({action:'loginStatus', requestId});
+                    if (!result.pending) break;
+                }
+                if (!result || !result.success || !result.sessionToken) throw new Error((result && result.error) || 'Login was not confirmed. Try again.');
+                bdsSessionToken = result.sessionToken;
+                document.getElementById('bdsLoginPassword').value = '';
+                document.getElementById('bds-access-gate').hidden = true;
+                document.getElementById('bds-report-app').hidden = false;
+                await checkConnection();
+                await loadSubjectCatalogue();
+                loadSubjects();
+                await fetchAllStudents({quiet: true}).catch(() => {});
+                updateDashboardMetrics();
+            } catch (error) { message.textContent = error.message; }
+            finally { button.disabled = false; }
+        }
+        function bdsRequireLogin() {
+            bdsSessionToken = '';
+            bdsPendingWrite = null;
+            bdsAuthoritativeStudents = []; allStudents = []; subjectCatalogue = [];
+            bdsCatalogueLoaded = false;
+            const results = document.getElementById('searchResults');
+            const preview = document.getElementById('reportPreview');
+            if (results) results.textContent = '';
+            if (preview) preview.textContent = '';
+            ['studentName','fatherName','rollNumber','teacherComments'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.value = '';
+            });
+            document.getElementById('bds-report-app').hidden = true;
+            document.getElementById('bds-access-gate').hidden = false;
+            document.getElementById('bdsLoginPassword').value = '';
+        }
+        async function bdsLogout() {
+            const token = bdsSessionToken, url = bdsCurrentEndpoint();
+            bdsRequireLogin();
+            if (token && url) {
+                try { await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=UTF-8'},
+                    body:JSON.stringify({action:'logout',sessionToken:token}) }); } catch (_) {}
+            }
+        }
         function initializeStorage() {
             // Cache is optional and scoped to the current Apps Script deployment.
         }
@@ -1667,7 +1908,8 @@ function debounceCheck() {
             if (!baseUrl) return Promise.reject(new Error('Enter your Google Apps Script URL first.'));
             return new Promise((resolve, reject) => {
                 const callbackName = 'bds_jsonp_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-                const query = new URLSearchParams({ ...params, callback: callbackName }).toString();
+                const publicAction = ['ping', 'loginStatus'].includes(String(params.action || ''));
+                const query = new URLSearchParams({ ...params, ...(!publicAction && bdsSessionToken ? { sessionToken: bdsSessionToken } : {}), callback: callbackName }).toString();
                 const script = document.createElement('script');
                 let settled = false;
                 const cleanup = () => {
@@ -1681,7 +1923,10 @@ function debounceCheck() {
                 window[callbackName] = result => {
                     if (settled) return;
                     settled = true; clearTimeout(timeout); cleanup();
-                    if (result && result.success === false && !result.pending) reject(new Error(result.error || 'The Apps Script request failed.'));
+                    if (result && result.success === false && !result.pending) {
+                        if (/Authentication required|session expired/i.test(String(result.error || '')) && bdsSessionToken) bdsRequireLogin();
+                        reject(new Error(result.error || 'The Apps Script request failed.'));
+                    }
                     else resolve(result || {});
                 };
                 script.onerror = () => {
@@ -1712,7 +1957,7 @@ function debounceCheck() {
                     pending.transmitted = true;
                     await fetch(baseUrl, { method: 'POST', mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-                        body: JSON.stringify({ ...payload, requestId: pending.requestId }) });
+                        body: JSON.stringify({ ...payload, sessionToken: bdsSessionToken, requestId: pending.requestId }) });
                 }
                 const startedAt = Date.now();
                 while (Date.now() - startedAt < 30000) {
