@@ -1194,6 +1194,39 @@
         @media (prefers-reduced-motion:reduce) {
             #bds-access-gate *, #bds-access-gate *::before, #bds-access-gate *::after {animation:none; transition:none; scroll-behavior:auto;}
         }
+
+        /* BDS session restoration and action notifications: main document only. */
+        /* BDS session restoration and unified action notifications. */
+        #bds-session-boot {position:fixed; inset:0; z-index:10020; display:grid; place-items:center; padding:20px; background:radial-gradient(circle at 12% 12%,#1b5460 0%,#0b3242 45%,#092531 100%); font-family:Inter,"Segoe UI",Arial,sans-serif; color:#f4faf8;}
+        #bds-session-boot[hidden] {display:none;}
+        #bds-session-boot .bds-boot-panel {width:min(420px,100%); text-align:center; padding:clamp(28px,6vw,44px); border:1px solid rgba(255,255,255,.17); border-radius:24px; background:rgba(255,255,255,.055); box-shadow:0 24px 62px rgba(0,0,0,.19);}
+        #bds-session-boot img {display:block; width:76px; height:76px; object-fit:contain; margin:0 auto 20px; padding:8px; background:#fff; border-radius:18px;}
+        #bds-session-boot h2 {color:#fff; font-size:clamp(20px,4vw,25px); margin:0 0 9px; letter-spacing:-.025em;}
+        #bds-session-boot p {color:#c5dbd9; font-size:14px; line-height:1.6; margin:0;}
+        #bds-session-boot .bds-boot-spinner {display:block; width:31px; height:31px; margin:23px auto 0; border-radius:50%; border:3px solid rgba(255,255,255,.19); border-top-color:#9ae6d2; animation:bds-boot-spin .85s linear infinite;}
+        @keyframes bds-boot-spin {to {transform:rotate(360deg);}}
+        #bds-toast-stack {position:fixed; top:max(16px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); z-index:11000; width:min(400px,calc(100vw - 32px)); display:grid; gap:10px; pointer-events:none; font-family:Inter,"Segoe UI",Arial,sans-serif;}
+        #bds-toast-stack .bds-toast {pointer-events:auto; display:grid; grid-template-columns:26px minmax(0,1fr) 30px; gap:10px; align-items:start; border-radius:14px; border:1px solid #d2e0e1; padding:13px 12px 13px 14px; background:#fff; color:#173b45; box-shadow:0 12px 36px rgba(9,42,52,.18); animation:bds-toast-enter .2s ease both;}
+        #bds-toast-stack .bds-toast[data-kind="success"] {border-left:4px solid #19806d;}
+        #bds-toast-stack .bds-toast[data-kind="error"] {border-left:4px solid #b43c4b;}
+        #bds-toast-stack .bds-toast[data-kind="warning"] {border-left:4px solid #be7a19;}
+        #bds-toast-stack .bds-toast[data-kind="info"] {border-left:4px solid #37799c;}
+        #bds-toast-stack .bds-toast-icon {font-size:19px; line-height:1.4; color:#1a7165;}
+        #bds-toast-stack .bds-toast[data-kind="error"] .bds-toast-icon {color:#b43c4b;}
+        #bds-toast-stack .bds-toast[data-kind="warning"] .bds-toast-icon {color:#ad701c;}
+        #bds-toast-stack .bds-toast-body {min-width:0; font-size:13px; line-height:1.5; overflow-wrap:anywhere;}
+        #bds-toast-stack .bds-toast-body strong {display:block; font-size:12px; margin-bottom:2px;}
+        #bds-toast-stack .bds-toast-close {border:0; background:transparent; font:inherit; font-size:20px; line-height:1; color:#58717a; cursor:pointer; border-radius:7px; width:30px; height:30px;}
+        #bds-toast-stack .bds-toast-close:hover {background:#edf3f2;}
+        #bds-toast-stack .bds-toast-close:focus-visible {outline:3px solid #287e76; outline-offset:2px;}
+        @keyframes bds-toast-enter {from {opacity:0; transform:translateY(-9px);} to {opacity:1; transform:translateY(0);}}
+        @media (max-width:600px) {#bds-toast-stack {left:12px; right:12px; top:max(12px,env(safe-area-inset-top)); width:auto;} #bds-toast-stack .bds-toast {padding:12px;}}
+        @media (prefers-reduced-motion:reduce) {#bds-session-boot .bds-boot-spinner, #bds-toast-stack .bds-toast {animation:none;}}
+        #bds-toast-stack {max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin;}
+        #bds-toast-stack:empty {display:none;}
+        #bds-toast-stack .bds-toast {max-width:100%;}
+        @media (max-width:600px) { #bds-toast-stack {max-height:calc(100dvh - 24px - env(safe-area-inset-top));} }
+        @media (prefers-reduced-motion:reduce) {#bds-toast-stack .bds-toast {transition:none;} }
 </style>
 </head>
 <body class="bds-page">
@@ -1987,7 +2020,7 @@ function debounceCheck() {
             }
         }
 
-        async function loadSubjectCatalogue() {
+        async function loadSubjectCatalogue(options = {}) {
             try {
                 const result = await jsonpRequest({ action: 'getSubjects', includeInactive: '1' });
                 if (result && Array.isArray(result.subjects)) {
@@ -2001,6 +2034,8 @@ function debounceCheck() {
                     if (cached) { subjectCatalogue = cached.records; bdsCatalogueLoaded = true; }
                 } catch (_) {}
                 console.warn('Subject catalogue could not be refreshed:', error.message);
+                if (options.notifyOnFailure) showMessage('Could not refresh the subject catalogue. The displayed subjects may be outdated.', 'warning');
+                if (options.requireFresh) throw error;
             }
         }
 
@@ -2042,7 +2077,7 @@ function debounceCheck() {
             document.getElementById('subjectManagerModal').classList.add('active');
             resetManagedSubjectForm();
             document.getElementById('managedSubjectsList').innerHTML = '<div class="bds-empty-insight">Refreshing subject catalogue...</div>';
-            await loadSubjectCatalogue();
+            await loadSubjectCatalogue({ notifyOnFailure: true });
             renderSubjectManager();
         }
 
@@ -2107,7 +2142,8 @@ function debounceCheck() {
                 const existingSubject = subjectId ? subjectCatalogue.find(item => item.subjectId === subjectId) : null;
                 const status = existingSubject ? existingSubject.status : 'Active';
                 await apiPost({ action: 'saveSubject', subject: { subjectId, name, defaultTotalMarks, status, recordVersion: existingSubject ? existingSubject.recordVersion : '' } });
-                await loadSubjectCatalogue();
+                showMessage('Subject change saved in Google Sheets.', 'success');
+                await loadSubjectCatalogue({ notifyOnFailure: true });
                 if (existingSubject) {
                     Array.from(document.getElementById('subjectsBody').rows).forEach(row => {
                         if (row.dataset.subjectId !== subjectId) return;
@@ -2123,7 +2159,6 @@ function debounceCheck() {
                 const savedSubject = subjectCatalogue.find(item => item.name.toLowerCase() === name.toLowerCase());
                 const existingRow = Array.from(document.getElementById('subjectsBody').rows).find(row => row.cells[0].querySelector('input')?.value.trim().toLowerCase() === name.toLowerCase());
                 if (savedSubject && !existingRow && !isEditMode) addSubjectRow(savedSubject.name, savedSubject.defaultTotalMarks, '', '', '', savedSubject.subjectId);
-                showMessage('Subject saved successfully.', 'success');
             } catch (error) {
                 showMessage('Subject was not saved: ' + error.message, 'error');
             } finally { button.disabled = false; }
@@ -2135,8 +2170,8 @@ function debounceCheck() {
             const nextStatus = subject.status === 'Inactive' ? 'Active' : 'Inactive';
             try {
                 await apiPost({ action: 'saveSubject', subject: { ...subject, status: nextStatus, recordVersion: subject.recordVersion } });
-                await loadSubjectCatalogue(); renderSubjectManager();
-                showMessage(subject.name + ' is now ' + nextStatus.toLowerCase() + '.', 'success');
+                showMessage(subject.name + (nextStatus === 'Active' ? ' activated' : ' deactivated') + ' in Google Sheets.', 'success');
+                await loadSubjectCatalogue({ notifyOnFailure: true }); renderSubjectManager();
             } catch (error) { showMessage('Could not update subject: ' + error.message, 'error'); }
         }
 
@@ -2350,15 +2385,18 @@ function hideSaveLoading() {
                 const result = await apiPost({ ...data, action: isEditMode ? 'update' : 'create' });
                 const savedStudent = result.student || data;
                 if (!savedStudent.recordId) savedStudent.recordId = data.recordId || '';
-                if (isEditMode) cancelEdit();
+                const wasEditing = isEditMode;
+                if (wasEditing) cancelEdit({ quiet: true });
                 hideSaveLoading();
+                // A confirmed write is a success even if a separate follow-up refresh fails.
+                showMessage(wasEditing ? 'Student record updated in Google Sheets.' : 'Student record saved to Google Sheets.', 'success');
                 try {
                     await fetchAllStudents({ quiet: true });
                     await loadSubjectCatalogue();
-                    showMessage('Save confirmed and latest Google Sheets data refreshed.', 'success');
+                    bdsSyncStatus('Saved and synchronized with Google Sheets.', false);
                 } catch (refreshError) {
                     bdsSyncStatus('Save confirmed, but the latest server refresh failed. Select Fetch All.', true);
-                    showMessage('Save confirmed, but refresh failed: ' + refreshError.message, 'info');
+                    showMessage('Saved successfully, but the latest records could not be refreshed. Select Fetch All to retry.', 'warning');
                 }
             } catch (error) {
                 hideSaveLoading();
@@ -2369,7 +2407,7 @@ function hideSaveLoading() {
         // =============================================
         // CANCEL EDIT MODE
         // =============================================
-        function cancelEdit() {
+        function cancelEdit(options = {}) {
             isEditMode = false;
             editingStudentTimestamp = null;
             editingStudentData = null;
@@ -2383,11 +2421,11 @@ function hideSaveLoading() {
             btnSave.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-light))';
             
             // Clear form
-            clearForm();
+            clearForm({ quiet: true });
 
             // Keep dashboard up to date after leaving edit mode.
             updateDashboardMetrics();
-            showMessage('Editing cancelled. You are back in new-student mode.', 'info');
+            if (!options.quiet) showMessage('Editing cancelled. You are back in new-student mode.', 'info');
 
         }
 
@@ -3280,32 +3318,7 @@ font-weight: 600;
             th { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     
-        /* BDS session restoration and unified action notifications. */
-        #bds-session-boot {position:fixed; inset:0; z-index:10020; display:grid; place-items:center; padding:20px; background:radial-gradient(circle at 12% 12%,#1b5460 0%,#0b3242 45%,#092531 100%); font-family:Inter,"Segoe UI",Arial,sans-serif; color:#f4faf8;}
-        #bds-session-boot[hidden] {display:none;}
-        #bds-session-boot .bds-boot-panel {width:min(420px,100%); text-align:center; padding:clamp(28px,6vw,44px); border:1px solid rgba(255,255,255,.17); border-radius:24px; background:rgba(255,255,255,.055); box-shadow:0 24px 62px rgba(0,0,0,.19);}
-        #bds-session-boot img {display:block; width:76px; height:76px; object-fit:contain; margin:0 auto 20px; padding:8px; background:#fff; border-radius:18px;}
-        #bds-session-boot h2 {color:#fff; font-size:clamp(20px,4vw,25px); margin:0 0 9px; letter-spacing:-.025em;}
-        #bds-session-boot p {color:#c5dbd9; font-size:14px; line-height:1.6; margin:0;}
-        #bds-session-boot .bds-boot-spinner {display:block; width:31px; height:31px; margin:23px auto 0; border-radius:50%; border:3px solid rgba(255,255,255,.19); border-top-color:#9ae6d2; animation:bds-boot-spin .85s linear infinite;}
-        @keyframes bds-boot-spin {to {transform:rotate(360deg);}}
-        #bds-toast-stack {position:fixed; top:max(16px,env(safe-area-inset-top)); right:max(16px,env(safe-area-inset-right)); z-index:11000; width:min(400px,calc(100vw - 32px)); display:grid; gap:10px; pointer-events:none; font-family:Inter,"Segoe UI",Arial,sans-serif;}
-        #bds-toast-stack .bds-toast {pointer-events:auto; display:grid; grid-template-columns:26px minmax(0,1fr) 30px; gap:10px; align-items:start; border-radius:14px; border:1px solid #d2e0e1; padding:13px 12px 13px 14px; background:#fff; color:#173b45; box-shadow:0 12px 36px rgba(9,42,52,.18); animation:bds-toast-enter .2s ease both;}
-        #bds-toast-stack .bds-toast[data-kind="success"] {border-left:4px solid #19806d;}
-        #bds-toast-stack .bds-toast[data-kind="error"] {border-left:4px solid #b43c4b;}
-        #bds-toast-stack .bds-toast[data-kind="warning"] {border-left:4px solid #be7a19;}
-        #bds-toast-stack .bds-toast[data-kind="info"] {border-left:4px solid #37799c;}
-        #bds-toast-stack .bds-toast-icon {font-size:19px; line-height:1.4; color:#1a7165;}
-        #bds-toast-stack .bds-toast[data-kind="error"] .bds-toast-icon {color:#b43c4b;}
-        #bds-toast-stack .bds-toast[data-kind="warning"] .bds-toast-icon {color:#ad701c;}
-        #bds-toast-stack .bds-toast-body {min-width:0; font-size:13px; line-height:1.5; overflow-wrap:anywhere;}
-        #bds-toast-stack .bds-toast-body strong {display:block; font-size:12px; margin-bottom:2px;}
-        #bds-toast-stack .bds-toast-close {border:0; background:transparent; font:inherit; font-size:20px; line-height:1; color:#58717a; cursor:pointer; border-radius:7px; width:30px; height:30px;}
-        #bds-toast-stack .bds-toast-close:hover {background:#edf3f2;}
-        #bds-toast-stack .bds-toast-close:focus-visible {outline:3px solid #287e76; outline-offset:2px;}
-        @keyframes bds-toast-enter {from {opacity:0; transform:translateY(-9px);} to {opacity:1; transform:translateY(0);}}
-        @media (max-width:600px) {#bds-toast-stack {left:12px; right:12px; top:max(12px,env(safe-area-inset-top)); width:auto;} #bds-toast-stack .bds-toast {padding:12px;}}
-        @media (prefers-reduced-motion:reduce) {#bds-session-boot .bds-boot-spinner, #bds-toast-stack .bds-toast {animation:none;}}
+
 </style>
 </head>
 <body>
@@ -3395,15 +3408,15 @@ font-weight: 600;
             const kind = ['success','error','warning','info'].includes(type) ? type : 'info';
             const titles = {success:'Success',error:'Action needs attention',warning:'Please review',info:'BDS update'};
             const symbols = {success:'✓',error:'!',warning:'!',info:'i'};
-            // Replace transient progress announcements, without suppressing terminal results.
-            if (kind === 'info' && /^(Fetching student records|Checking roll number|Saving student record|Updating student record|Preparing PDF)/.test(String(text))) {
-                stack.querySelectorAll('.bds-toast[data-progress="true"]').forEach(node => bdsDismissToast(node));
-            } else {
-                stack.querySelectorAll('.bds-toast[data-progress="true"]').forEach(node => bdsDismissToast(node));
-            }
+            // Replace in-progress messages before showing the latest action outcome.
+            stack.querySelectorAll('.bds-toast[data-progress="true"]').forEach(node => bdsDismissToast(node));
+            // Avoid stacking identical notices when an action is tapped repeatedly.
+            const previous = Array.from(stack.children).find(node => node.dataset.kind === kind && node.dataset.message === String(text));
+            if (previous) bdsDismissToast(previous);
             const toast = document.createElement('div');
             toast.className = 'bds-toast';
             toast.dataset.kind = kind;
+            toast.dataset.message = String(text);
             toast.dataset.progress = kind === 'info' && /^(Fetching student records|Checking roll number|Saving student record|Updating student record|Preparing PDF)/.test(String(text)) ? 'true' : 'false';
             toast.setAttribute('role', kind === 'error' ? 'alert' : 'status');
             const icon = document.createElement('span');
@@ -3416,7 +3429,11 @@ font-weight: 600;
             close.addEventListener('click', () => bdsDismissToast(toast));
             toast.append(icon, body, close);
             stack.prepend(toast);
-            while (stack.children.length > 4) bdsDismissToast(stack.lastElementChild);
+            while (stack.children.length > 4) {
+                const dismissable = Array.from(stack.children).reverse().find(node => node.dataset.kind !== 'error');
+                if (!dismissable) break; // Keep critical errors until dismissed.
+                bdsDismissToast(dismissable);
+            }
             // Errors remain until dismissed. Ordinary notices disappear automatically.
             if (kind !== 'error') bdsToastTimers.set(toast, setTimeout(() => bdsDismissToast(toast), kind === 'warning' ? 9000 : 5200));
         }
@@ -3435,7 +3452,7 @@ font-weight: 600;
        // CLEAR FORM FUNCTION
        // =============================================
 
-        function clearForm() {
+        function clearForm(options = {}) {
     // 1. Clear text and dropdown fields (Set to empty or defaults)
     document.getElementById('academicSession').value = '2025-26';
     document.getElementById('reportTerm').value = '1st Term';
@@ -3497,13 +3514,8 @@ font-weight: 600;
         rollInput.style.backgroundColor = "#ffffff";
     }
     
-    // 6. Cancel edit mode if active (calls cancelEdit which also resets)
-    if (isEditMode) {
-        cancelEdit();
-    }
-    
-    // 7. Final success message
-    showMessage('Form cleared and unlocked', 'success');
+    // Edit state is cleared directly above to avoid recursive reset notifications.
+    if (!options.quiet) showMessage('Form cleared and unlocked', 'success');
 }
 
 
