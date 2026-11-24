@@ -947,20 +947,25 @@
         #bds-report-app .bds-subject-toolbar { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px; }
         #bds-report-app .bds-manage-subjects { background:linear-gradient(135deg,#183a70,#2a6295); }
         #bds-report-app .bds-subject-hint { color:#64748b; font-size:12px; margin:2px 0 12px; }
-        #bds-report-app .bds-modal-content { width:min(560px,94vw); max-height:min(82vh,760px); overflow:auto; padding:24px; border:1px solid #e3eaf3; border-radius:20px; box-shadow:0 24px 70px rgba(14,32,61,.24); animation:bds-modal-in .22s ease both; }
+        #bds-report-app #bdsLoadMissingDefaults[hidden] { display:none !important; }
+        #bds-report-app #subjectManagerModal .bds-modal-content { width:min(960px,96vw); max-width:960px; max-height:calc(100dvh - 32px); padding:clamp(16px,3vw,27px); overflow-y:auto; }
         #bds-report-app .bds-modal-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:18px; }
         #bds-report-app .bds-modal-heading h3 { color:#172b4d; font-size:20px; margin:0 0 5px; }
         #bds-report-app .bds-modal-heading p { color:#64748b; font-size:13px; margin:0; }
-        #bds-report-app .bds-subject-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; align-items:end; gap:10px; padding:14px; border:1px solid #e3eaf3; border-radius:14px; background:#f7faff; }
+        #bds-report-app .bds-subject-form { display:grid; grid-template-columns:minmax(0,1fr) 130px auto; align-items:end; gap:12px; padding:16px; border:1px solid #e3eaf3; border-radius:14px; background:#f7faff; }
         #bds-report-app .bds-subject-form label { display:block; color:#42536d; font-size:12px; font-weight:700; margin-bottom:6px; }
         #bds-report-app .bds-subject-form input { width:100%; min-height:42px; padding:10px 12px; border:1px solid #d6e0ed; border-radius:10px; font:inherit; }
-        #bds-report-app .bds-subject-list { display:grid; gap:8px; margin-top:16px; }
-        #bds-report-app .bds-subject-item { display:grid; grid-template-columns:minmax(0,1fr) 90px 82px auto; gap:10px; align-items:center; padding:11px 12px; border:1px solid #e8edf4; border-radius:12px; background:#fff; }
-        #bds-report-app .bds-subject-item strong { color:#203654; font-size:13px; overflow-wrap:anywhere; }
-        #bds-report-app .bds-subject-item small { color:#718096; font-size:11px; }
-        #bds-report-app .bds-subject-item input { width:100%; min-width:0; padding:8px; border:1px solid #dce4ee; border-radius:8px; }
-        #bds-report-app .bds-subject-item button { padding:8px 10px; font-size:12px; }
-        #bds-report-app .bds-status-pill { display:inline-flex; justify-content:center; padding:4px 8px; border-radius:30px; color:#16734b; background:#e8f7ef; font-size:10px; font-weight:800; }
+        #bds-report-app .bds-subject-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+        #bds-report-app .bds-subject-item { display:flex; flex-direction:column; min-width:0; gap:14px; padding:16px; border:1px solid #dce5ef; border-radius:16px; background:#fff; box-shadow:0 3px 14px rgba(19,49,79,.035); }
+        #bds-report-app .bds-subject-item-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; min-width:0; }
+        #bds-report-app .bds-subject-item-header > div { min-width:0; }
+        #bds-report-app .bds-subject-item strong { color:#203654; font-size:15px; overflow-wrap:break-word; }
+        #bds-report-app .bds-subject-item small { color:#718096; font-size:11px; overflow-wrap:anywhere; }
+        #bds-report-app .bds-subject-meta { display:flex; align-items:baseline; gap:6px; color:#586b84; font-size:12px; }
+        #bds-report-app .bds-subject-meta strong { font-size:21px; font-variant-numeric:tabular-nums; }
+        #bds-report-app .bds-subject-actions { display:flex; gap:8px; margin-top:auto; flex-wrap:wrap; }
+        #bds-report-app .bds-subject-actions button { flex:1 1 120px; min-height:40px; padding:8px 12px; font-size:12px; }
+        #bds-report-app .bds-status-pill { display:inline-flex; justify-content:center; flex-shrink:0; padding:5px 9px; border-radius:30px; color:#16734b; background:#e8f7ef; font-size:11px; font-weight:800; }
         #bds-report-app .bds-status-pill.inactive { color:#7c5b16; background:#fff4d7; }
         #bds-report-app .bds-dashboard-insights { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 22px; }
         #bds-report-app .bds-insight-card { min-width:0; padding:17px; border:1px solid #e6edf5; border-radius:16px; background:#fff; box-shadow:0 7px 20px rgba(21,51,88,.045); }
@@ -994,12 +999,11 @@
             #bds-report-app .bds-dashboard-insights { grid-template-columns:1fr; }
             #bds-report-app .bds-subject-form { grid-template-columns:1fr 110px; }
             #bds-report-app .bds-subject-form button { grid-column:1 / -1; width:100%; }
+            #bds-report-app .bds-subject-list { grid-template-columns:1fr; }
         }
         @media (max-width:480px)  {
-            #bds-report-app .bds-subject-item { grid-template-columns:minmax(0,1fr) 74px; }
-            #bds-report-app .bds-subject-item .bds-subject-status { grid-column:1; }
-            #bds-report-app .bds-subject-item button { grid-column:2; grid-row:1 / span 2; }
-            #bds-report-app .bds-modal-content { padding:17px; }
+            #bds-report-app #subjectManagerModal .bds-modal-content { width:100%; padding:16px; }
+            #bds-report-app .bds-subject-item { padding:14px; }
         }
 
     #bds-report-app .bds-sync-state { padding:10px 14px; border-radius:10px; margin:12px 0; background:#eaf4ff; color:#183b5b; font-size:13px; border:1px solid #bad9f1; overflow-wrap:anywhere; }
@@ -1488,6 +1492,7 @@
                 <h2>📊 Subject Scores</h2>
                 <div class="bds-subject-toolbar">
                     <button class="btn btn-success" type="button" onclick="addSubjectRow()">➕ Add Subject</button>
+                    <button class="btn btn-secondary" id="bdsLoadMissingDefaults" type="button" onclick="loadMissingDefaultSubjects()" hidden>📚 Load Missing Default Subjects</button>
                     <button class="btn bds-manage-subjects" type="button" onclick="openSubjectManager()">⚙ Manage Subjects</button>
                 </div>
                 <p class="bds-subject-hint">Add assessment rows for this student, or manage the school's reusable subject catalogue.</p>
@@ -1542,6 +1547,7 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
+                <button type="button" id="btnNewStudent" class="btn btn-secondary" onclick="startNewStudent()">➕ New Student</button>
                 <button type="button" id="btnSave" class="btn btn-primary" onclick="saveOrUpdate()">💾 Save to Sheet</button>
                 <button type="button" id="btnPrint" class="btn btn-success" onclick="printReportCard()">🖨️ Print PDF</button>
                 <button type="button" id="btnClear" class="btn btn-warning" onclick="clearForm()">🔄 Clear</button>
@@ -1646,7 +1652,8 @@
             { name: 'Computer', totalMarks: 50 },
             { name: 'Stemp21', totalMarks: 50 },
             { name: 'Physics', totalMarks: 100 },
-            { name: 'Chemistry', totalMarks: 100 }
+            { name: 'Chemistry', totalMarks: 100 },
+            { name: 'Art', totalMarks: 50 }
         ];
         let bdsCatalogueLoaded = false;
         let subjectCatalogue = defaultSubjects.map((subject, index) => ({
@@ -2039,21 +2046,69 @@ function debounceCheck() {
             }
         }
 
+        function bdsSubjectKey(name) { return String(name || '').trim().toLowerCase(); }
+        function bdsFindCatalogueSubject(name) {
+            return subjectCatalogue.find(item => bdsSubjectKey(item.name) === bdsSubjectKey(name)) || null;
+        }
+        function bdsAssessedSubject(subject) {
+            // A zero mark is meaningful; name, maximum, comments and signatures alone are not.
+            return subject && subject.marksObtained != null && String(subject.marksObtained).trim() !== '';
+        }
+        function bdsAddMissingDefaults(options = {}) {
+            const tbody = document.getElementById('subjectsBody');
+            if (!tbody) return 0;
+            const existingRows = Array.from(tbody.rows);
+            const existing = new Set(existingRows.map(row => bdsSubjectKey(row.cells[0].querySelector('input')?.value)));
+            const existingIds = new Set(existingRows.map(row => String(row.dataset.subjectId || '')).filter(Boolean));
+            let added = 0;
+            defaultSubjects.forEach(subject => {
+                const key = bdsSubjectKey(subject.name);
+                const catalogued = bdsFindCatalogueSubject(subject.name);
+                if (existing.has(key) || (catalogued && existingIds.has(String(catalogued.subjectId || '')))) return;
+                // Keep the canonical catalogue ID even if the subject is inactive;
+                // this never changes catalogue activation status.
+                addSubjectRow(catalogued ? catalogued.name : subject.name,
+                    catalogued ? catalogued.defaultTotalMarks : subject.totalMarks,
+                    '', '', '', catalogued && !String(catalogued.subjectId || '').startsWith('LOCAL-') ? catalogued.subjectId : '');
+                existing.add(key);
+                if (catalogued && catalogued.subjectId) existingIds.add(String(catalogued.subjectId));
+                added++;
+            });
+            return added;
+        }
         function loadSubjects() {
             const tbody = document.getElementById('subjectsBody');
             if (!tbody) return;
             tbody.innerHTML = '';
-            const activeSubjects = subjectCatalogue.filter(subject => subject.status !== 'Inactive');
-            // A new blank form should retain the 11-subject starter layout even when
-            // the catalogue request fails or the catalogue has no entries yet.
-            // An intentionally deactivated catalogue is not restored implicitly.
-            const useStarterSubjects = subjectCatalogue.length === 0;
-            const subjectsToLoad = useStarterSubjects ? defaultSubjects : activeSubjects;
-            subjectsToLoad.forEach(subject => addSubjectRow(subject.name, subject.defaultTotalMarks || subject.totalMarks || 100, '', '', '', useStarterSubjects ? '' : (subject.subjectId || '')));
+            // New registration always starts with exactly the 12 standard subjects.
+            // Custom subjects remain available through Add Subject and Subject Manager.
+            bdsAddMissingDefaults();
+        }
+        function bdsOrderDefaultRows() {
+            const tbody = document.getElementById('subjectsBody');
+            const rows = Array.from(tbody.rows);
+            const order = new Map(defaultSubjects.map((subject,index) => [bdsSubjectKey(subject.name), index]));
+            rows.sort((a,b) => {
+                const nameA = bdsSubjectKey(a.cells[0].querySelector('input')?.value);
+                const nameB = bdsSubjectKey(b.cells[0].querySelector('input')?.value);
+                return (order.get(nameA) ?? 10000) - (order.get(nameB) ?? 10000);
+            }).forEach(row => tbody.appendChild(row));
+        }
+        function loadMissingDefaultSubjects() {
+            if (!isEditMode) return;
+            const added = bdsAddMissingDefaults();
+            bdsOrderDefaultRows();
+            showMessage(added ? added + ' missing default subject' + (added === 1 ? '' : 's') + ' added to the form. Only assessed rows will be saved.' : 'All 12 default subjects are already displayed.', 'info');
+        }
+        function bdsUpdateMissingDefaultsControl() {
+            const button = document.getElementById('bdsLoadMissingDefaults');
+            if (button) button.hidden = !isEditMode;
         }
 
         function addSubjectRow(name = '', totalMarks = 100, obtained = '', remarks = '', signature = '', subjectId = '') {
-            if (subjectId) bdsExplicitSubjectRemovals.delete(subjectId);
+            // A blank replacement row must not cancel an explicitly requested removal.
+            // A subsequently assessed row cancels removal during save payload reconciliation.
+            if (subjectId && String(obtained).trim() !== '') bdsExplicitSubjectRemovals.delete(subjectId);
             const tbody = document.getElementById('subjectsBody');
             const row = tbody.insertRow();
             row.dataset.subjectId = subjectId || '';
@@ -2100,12 +2155,14 @@ function debounceCheck() {
                 return;
             }
             list.innerHTML = subjectCatalogue.map((subject, subjectIndex) => `
-                <div class="bds-subject-item">
-                    <div><strong>${escapeHTML(subject.name)}</strong><br><small>${escapeHTML(subject.subjectId)}</small></div>
-                    <div><small>Default: <strong>${escapeHTML(subject.defaultTotalMarks)}</strong> marks</small></div>
-                    <div class="bds-subject-status"><span class="bds-status-pill ${subject.status === 'Inactive' ? 'inactive' : ''}">${subject.status === 'Inactive' ? 'Inactive' : 'Active'}</span></div>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-secondary" onclick="editManagedSubjectByIndex(${subjectIndex})">Edit</button><button type="button" class="btn ${subject.status === 'Inactive' ? 'btn-success' : 'btn-warning'}" onclick="toggleManagedSubjectByIndex(${subjectIndex})">${subject.status === 'Inactive' ? 'Activate' : 'Deactivate'}</button></div>
-                </div>`).join('');
+                <article class="bds-subject-item">
+                    <div class="bds-subject-item-header">
+                        <div><strong>${escapeHTML(subject.name)}</strong><div><small>${escapeHTML(subject.subjectId)}</small></div></div>
+                        <span class="bds-status-pill ${subject.status === 'Inactive' ? 'inactive' : ''}">${subject.status === 'Inactive' ? 'Inactive' : 'Active'}</span>
+                    </div>
+                    <div class="bds-subject-meta"><strong>${escapeHTML(subject.defaultTotalMarks)}</strong><span>default total marks</span></div>
+                    <div class="bds-subject-actions"><button type="button" class="btn btn-secondary" onclick="editManagedSubjectByIndex(${subjectIndex})" aria-label="Edit ${escapeHTML(subject.name)}">Edit</button><button type="button" class="btn ${subject.status === 'Inactive' ? 'btn-success' : 'btn-warning'}" onclick="toggleManagedSubjectByIndex(${subjectIndex})" aria-label="${subject.status === 'Inactive' ? 'Activate' : 'Deactivate'} ${escapeHTML(subject.name)}">${subject.status === 'Inactive' ? 'Activate' : 'Deactivate'}</button></div>
+                </article>`).join('');
         }
 
         function editManagedSubjectByIndex(index) {
@@ -2156,9 +2213,7 @@ function debounceCheck() {
                     });
                 }
                 renderSubjectManager(); resetManagedSubjectForm();
-                const savedSubject = subjectCatalogue.find(item => item.name.toLowerCase() === name.toLowerCase());
-                const existingRow = Array.from(document.getElementById('subjectsBody').rows).find(row => row.cells[0].querySelector('input')?.value.trim().toLowerCase() === name.toLowerCase());
-                if (savedSubject && !existingRow && !isEditMode) addSubjectRow(savedSubject.name, savedSubject.defaultTotalMarks, '', '', '', savedSubject.subjectId);
+                // Catalogue edits do not silently add assessment rows. Teachers choose what to assess.
             } catch (error) {
                 showMessage('Subject was not saved: ' + error.message, 'error');
             } finally { button.disabled = false; }
@@ -2237,6 +2292,7 @@ function closeDuplicateModal() {
             if (!studentToEdit) return;
             loadStudentData(studentToEdit);
             isEditMode = true;
+            bdsUpdateMissingDefaultsControl();
             editingStudentTimestamp = studentToEdit.timestamp;
             editingStudentData = studentToEdit;
             document.getElementById('editModeIndicator').style.display = 'flex';
@@ -2370,9 +2426,20 @@ function hideSaveLoading() {
                     subjects: []
                 };
                 const rows = document.getElementById('subjectsBody').rows;
+                const originallyAssessedIds = new Set((editingStudentData?.subjects || [])
+                    .filter(bdsAssessedSubject).map(item => String(item.subjectId || '')).filter(Boolean));
+                const removedIds = new Set(data.removedSubjectIds);
                 for (let i = 0; i < rows.length; i++) {
                     const inputs = rows[i].getElementsByTagName('input');
-                    if (!inputs[0].value.trim()) continue;
+                    const marks = inputs[2].value.trim();
+                    // Blank obtained marks mean "not assessed" even when name/total are prefilled.
+                    // Explicit zero and A (absent) are assessed values.
+                    if (!marks) {
+                        const id = String(rows[i].dataset.subjectId || '');
+                        if (isEditMode && id && originallyAssessedIds.has(id)) removedIds.add(id);
+                        continue;
+                    }
+                    if (!inputs[0].value.trim()) { hideSaveLoading(); showMessage('Enter a subject name for the row containing obtained marks.', 'error'); return; }
                     data.subjects.push({
                         subjectId: rows[i].dataset.subjectId || '',
                         name: inputs[0].value.trim(), totalMarks: inputs[1].value,
@@ -2381,6 +2448,9 @@ function hideSaveLoading() {
                         signature: inputs[4].value
                     });
                 }
+                // Explicitly remove previously assessed records whose marks were cleared.
+                data.removedSubjectIds = Array.from(removedIds).filter(id =>
+                    !data.subjects.some(subject => subject.subjectId === id));
                 showMessage(isEditMode ? 'Updating student record...' : 'Saving student record...', 'info');
                 const result = await apiPost({ ...data, action: isEditMode ? 'update' : 'create' });
                 const savedStudent = result.student || data;
@@ -2409,6 +2479,7 @@ function hideSaveLoading() {
         // =============================================
         function cancelEdit(options = {}) {
             isEditMode = false;
+            bdsUpdateMissingDefaultsControl();
             editingStudentTimestamp = null;
             editingStudentData = null;
             bdsExplicitSubjectRemovals.clear();
@@ -2746,7 +2817,10 @@ function displayStudentRecords(students) {
 
 function viewStudentAt(index) {
     const student = allStudents[index];
-    if (student) loadStudentData(student);
+    if (!student) return;
+    // A view action must never leave the previous student's edit identity active.
+    if (isEditMode) cancelEdit({ quiet: true });
+    loadStudentData(student);
 }
 
 function editStudentAt(index) {
@@ -2946,7 +3020,7 @@ function jumpToPage(page) {
             tbody.innerHTML = '';
             
             if (student.subjects && student.subjects.length > 0) {
-                student.subjects.forEach(subj => {
+                student.subjects.filter(bdsAssessedSubject).forEach(subj => {
                     const row = tbody.insertRow();
                     
                     // Format percentage - ensure it's displayed without % symbol
@@ -2996,6 +3070,7 @@ function jumpToPage(page) {
      function editStudentData(student) {
     // CRITICAL: Set global variables FIRST
     isEditMode = true;
+    bdsUpdateMissingDefaultsControl();
     editingStudentTimestamp = student.timestamp;
     editingStudentData = student;
     bdsExplicitSubjectRemovals.clear();
@@ -3449,6 +3524,21 @@ font-weight: 600;
 
 
         // =============================================
+        // EXPLICIT NEW-STUDENT FLOW
+        // =============================================
+        function startNewStudent() {
+            const keyFields = ['studentName','fatherName','studentClass','rollNumber'];
+            const hasEnteredInfo = keyFields.some(id => document.getElementById(id).value.trim());
+            const hasEnteredMarks = Array.from(document.getElementById('subjectsBody').rows)
+                .some(row => String(row.cells[2].querySelector('input')?.value || '').trim() !== '');
+            if ((isEditMode || hasEnteredInfo || hasEnteredMarks) &&
+                !window.confirm('Start a new student? Unsaved form changes will be discarded.')) return;
+            clearForm({quiet:true});
+            showTab('input');
+            showMessage('New student form ready with 12 default subjects.', 'info');
+        }
+
+        // =============================================
        // CLEAR FORM FUNCTION
        // =============================================
 
@@ -3476,6 +3566,7 @@ font-weight: 600;
 
     // 3. RESET GLOBAL VARIABLES
     isEditMode = false;
+    bdsUpdateMissingDefaultsControl();
     editingStudentTimestamp = null;
     editingStudentData = null;
     bdsExplicitSubjectRemovals.clear();
