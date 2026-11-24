@@ -7,6 +7,18 @@
     <meta name="description" content="GGHS Benazir student report card management system for academic records, subject assessments and report printing.">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#173d56">
+    <!-- Private school app: noindex is preserved; sharing previews contain no student data. -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BDS Report Card System | GGHS Benazir">
+    <meta property="og:description" content="Secure school workspace for student assessments and academic reporting.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/penbeam/bds-report-card-system/main/images/bds-social-preview.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="BDS Report Card System with the two existing school logos">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BDS Report Card System">
+    <meta name="twitter:description" content="Secure school assessment and reporting workspace.">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/penbeam/bds-report-card-system/main/images/bds-social-preview.png">
     <style>
         /* =============================================
            CSS RESET & VARIABLES - Professional Grade
@@ -355,13 +367,14 @@
             }
         }
 
-        @media (min-width: 768px)  {
+        @media (min-width: 1100px)  {
             #bds-report-app .signatures-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(4, minmax(0,1fr));
             }
         }
 
         #bds-report-app .signature-field {
+            min-width:0;
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -1219,13 +1232,27 @@
 #bds-report-app .bds-export-header p{margin:0;color:#617987}
 #bds-report-app .bds-export-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
 #bds-report-app .bds-export-fields label,#bds-report-app .bds-export-passphrase{display:flex;flex-direction:column;gap:7px;font-weight:700;color:#1b4659;font-size:13px}
-#bds-report-app .bds-export-fields select,#bds-report-app .bds-export-passphrase input{width:100%;min-height:44px;background:#fff;border:1px solid #adc5d1;border-radius:10px;padding:10px;color:#1d4558}
+#bds-report-app .bds-export-fields select,#bds-report-app .bds-export-fields input,#bds-report-app .bds-export-passphrase input{width:100%;min-height:44px;background:#fff;border:1px solid #adc5d1;border-radius:10px;padding:10px;color:#1d4558}
 #bds-report-app .bds-export-note{background:#f3f8fa;border:1px solid #deebef;color:#425e6c;border-radius:12px;padding:12px;font-size:12px;line-height:1.6;margin:16px 0}
 #bds-report-app .bds-export-count{color:#1e6b63;font-weight:700;margin:12px 0}
 #bds-report-app .bds-export-toggle{display:flex;align-items:center;gap:12px;margin:20px 0;font-weight:700}
 #bds-report-app .bds-export-toggle input{width:22px;height:22px;flex:none}
 #bds-report-app .bds-export-modal .modal-actions{justify-content:flex-end;margin-top:20px}
 @media(max-width:600px){#bds-report-app .bds-export-fields{grid-template-columns:1fr}#bds-report-app .bds-export-modal .modal-actions>*{flex:1 1 100%}}
+/* Authoritative developer credit, styled consistently for both BDS entry surfaces. */
+#bds-access-gate .bds-developer-credit, #bds-report-app .bds-developer-credit {
+    font:600 11px/1.6 Inter,"Segoe UI",Roboto,Arial,sans-serif;
+    letter-spacing:.015em; text-align:center; overflow-wrap:anywhere;
+}
+#bds-access-gate .bds-developer-credit {margin:0 0 18px;color:#b8d4d0;}
+#bds-access-gate .bds-developer-credit a {color:#f7d7a0; text-decoration:underline; text-underline-offset:3px;}
+#bds-report-app .bds-developer-credit {padding:8px 14px;color:#506e79;background:#edf4f5;border:1px solid #d9e7eb;border-radius:11px;margin-bottom:13px;}
+#bds-report-app .bds-developer-credit a {color:#1b6378;text-decoration:underline;text-underline-offset:3px;}
+#bds-access-gate .bds-developer-credit a:focus-visible, #bds-report-app .bds-developer-credit a:focus-visible {outline:2px solid #d6ab64;outline-offset:3px;}
+#bds-report-app .bds-export-row-btn {border:1px solid #c9e0e3;border-radius:8px;padding:7px 10px;min-height:34px;color:#155c67;background:#f0f8f8;cursor:pointer;font:inherit;font-weight:700;}
+#bds-report-app .bds-export-row-btn:hover {background:#dceeee;}
+#bds-report-app .bds-export-row-btn:focus-visible {outline:3px solid #d6ab64;outline-offset:2px;}
+#bds-report-app #bdsExportStudent {min-width:0;}
 </style>
 </head>
 <body class="bds-page">
@@ -1235,6 +1262,7 @@
     </section>
     <div id="bds-toast-stack" aria-label="Application notifications" aria-live="polite" aria-atomic="false"></div>
     <section id="bds-access-gate" aria-label="BDS staff sign in" hidden>
+      <p class="bds-developer-credit">Developed by <strong>Muhammad Nadeem</strong>, Professional Web Developer. <a href="https://penbeam.com/" target="_blank" rel="noopener noreferrer">Visit penbeam.com</a></p>
       <div class="bds-gate-layout">
         <div class="bds-gate-brand">
           <div class="bds-gate-brand-top">
@@ -1268,6 +1296,7 @@
       </div>
     </section>
     <div class="container" id="bds-report-app" hidden>
+        <p class="bds-developer-credit">Developed by <strong>Muhammad Nadeem</strong>, Professional Web Developer. <a href="https://penbeam.com/" target="_blank" rel="noopener noreferrer">Visit penbeam.com</a></p>
         <!-- Header -->
         <div class="header">
             <h1>GGHS BENAZIR DISTRICT SCHOOL NAWABSHAH-1</h1>
@@ -1349,12 +1378,14 @@
     <div class="bds-export-header"><div><h3 id="bds-export-title">Export Center</h3><p>Export fresh student records with school-level permissions. <span data-bds-export-policy></span></p></div><button type="button" class="modal-btn cancel" onclick="closeExportModal()" aria-label="Close Export Center">✕</button></div>
     <div class="bds-export-fields">
       <label>Format<select id="bdsExportFormat" onchange="bdsUpdateExportPreview()"><option value="csv">CSV (.csv)</option><option value="xlsx">Excel workbook (.xlsx)</option><option value="pdf">PDF (Save as PDF)</option></select></label>
+      <label>Find student (optional)<input id="bdsExportStudentSearch" type="search" placeholder="Search name, roll or class" oninput="bdsPopulateExportStudents()" autocomplete="off" aria-label="Search available student records"></label>
+      <label>Student (optional)<select id="bdsExportStudent" onchange="bdsUpdateExportPreview()" aria-label="Choose an individual student"><option value="">All matching students</option></select></label>
       <label>Class<select id="bdsExportClass" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
       <label>Section<select id="bdsExportSection" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
       <label>Subject<select id="bdsExportSubject" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
       <label>Result Grade<select id="bdsExportGrade" onchange="bdsUpdateExportPreview()"><option value="">All</option><option>A+</option><option>A</option><option>B+</option><option>B</option><option>C</option><option>D</option><option>F</option></select></label>
     </div>
-    <p class="bds-export-note">With a subject selected, Result Grade filters that subject. Otherwise it filters the student's overall grade. Only assessed subject rows are exported. The latest server records are fetched before each export.</p>
+    <p class="bds-export-note">Choose a student to export one record, or leave Student at All matching students for a bulk report. With a subject selected, Result Grade filters that subject. Only assessed subject rows are exported. The latest server records are fetched before each export.</p>
     <p class="bds-export-count" id="bdsExportCount" aria-live="polite"></p>
     <p class="bds-export-note" id="bdsExportPreviewDetails" aria-live="polite"></p>
     <p class="bds-export-note">Report layout is selected automatically: Class Register, Subject Register, or Individual Student Assessment. CSV, XLSX and PDF use the same report structure; logos and page footer appear only in PDF.</p>
@@ -2777,6 +2808,15 @@ function editStudentAt(index) {
     if (student) editStudentData(student);
 }
 
+function exportStudentAt(index) {
+    const student = allStudents[index];
+    if (!student) { showMessage('Student record is no longer in the current list. Fetch All and retry.', 'warning'); return; }
+    const recordId = String(student.recordId || '').trim();
+    if (!recordId) { showMessage('This student has no permanent record ID. Refresh the school data before exporting.', 'error'); return; }
+    // Never select by roll number: roll numbers can repeat across classes and sections.
+    showExportOptions({recordId, individual:true});
+}
+
 function renderCurrentPage() {
     const container = document.getElementById('searchResults');
     
@@ -2825,6 +2865,7 @@ function renderCurrentPage() {
                 <td>
                     <button class="load-btn" type="button" onclick="viewStudentAt(${studentIndex})">View</button>
                     <button class="edit-btn" type="button" onclick="editStudentAt(${studentIndex})">Edit</button>
+                    <button class="bds-export-row-btn" type="button" onclick="exportStudentAt(${studentIndex})" aria-label="Export ${escapeHTML(student.studentName || 'student')} assessment">Export Student</button>
                 </td>
             </tr>
         `;
@@ -3619,12 +3660,28 @@ async function bdsGetExportPolicy() {
     });
     return bdsExportPolicy;
 }
-async function showExportOptions() {
+async function showExportOptions(options = {}) {
     try {
         showMessage('Checking export availability...', 'info');
         const available = await bdsGetExportPolicy();
         if (!available) { bdsExportOpenModal('exportDisabledModal'); return; }
+        // Record-level export must not inherit stale bulk filters that exclude its student.
+        if(options.individual) {
+            document.getElementById('bdsExportStudentSearch').value = '';
+            ['bdsExportClass','bdsExportSection','bdsExportSubject','bdsExportGrade'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
         bdsPopulateExportFilters();
+        const selector = document.getElementById('bdsExportStudent');
+        // Opening the normal Export button removes the previous record-specific restriction.
+        if (!options.recordId) document.getElementById('bdsExportStudentSearch').value='';
+        selector.value = options.recordId ? String(options.recordId) : '';
+        if (options.recordId && selector.value !== String(options.recordId)) {
+            showMessage('Selected student is no longer available. Refresh student records.', 'error');
+            return;
+        }
+        bdsUpdateExportPreview();
         bdsExportOpenModal('exportModal');
     } catch(error) { showMessage('Unable to check export permission: ' + error.message,'error'); }
 }
@@ -3706,14 +3763,39 @@ function bdsPopulateExportFilters() {
             select.value=selected;
         }
     });
+    bdsPopulateExportStudents();
+}
+function bdsPopulateExportStudents() {
+    const students=bdsAuthoritativeStudents||[];
+    const studentSelect=document.getElementById('bdsExportStudent');
+    const previousStudent=studentSelect.value;
+    const search=document.getElementById('bdsExportStudentSearch').value.trim().toLocaleLowerCase();
+    const allIds=new Set();
+    studentSelect.replaceChildren(new Option('All matching students',''));
+    students.slice().sort((a,b) => String(a.studentName||'').localeCompare(String(b.studentName||''),undefined,{numeric:true})).forEach(student => {
+        const id=String(student.recordId||'').trim();
+        if(!id || allIds.has(id))return;
+        allIds.add(id);
+        const classLabel=bdsClassLabel(student.studentClass,student.studentSection);
+        const label=[student.studentName||'Unnamed Student',classLabel||'Unspecified class','Roll '+(student.rollNumber||'?')].join(' | ');
+        if(!search || label.toLocaleLowerCase().includes(search) || id===previousStudent) {
+            studentSelect.add(new Option(label,id));
+        }
+    });
+    // The selected ID must persist through search and fresh-data refresh.
+    // If it disappears from refreshed records, keep a non-matching sentinel option.
+    if(previousStudent && !allIds.has(previousStudent))studentSelect.add(new Option('Selected student (no longer in refreshed data)',previousStudent));
+    studentSelect.value=previousStudent;
     bdsUpdateExportPreview();
 }
 function bdsFilteredExportStudents() {
+    const studentId=document.getElementById('bdsExportStudent').value;
     const klass=document.getElementById('bdsExportClass').value;
     const section=document.getElementById('bdsExportSection').value;
     const subject=document.getElementById('bdsExportSubject').value;
     const grade=document.getElementById('bdsExportGrade').value;
     return (bdsAuthoritativeStudents||[]).map(student => {
+        if(studentId && String(student.recordId||'').trim()!==studentId)return null;
         const parts=bdsClassParts(student);
         if (klass && parts.klass!==klass) return null;
         if (section && (parts.section || '__none__')!==section) return null;
@@ -3739,6 +3821,7 @@ function bdsReportSort(a,b) {
 }
 function bdsReportFilters() {
     return [
+        ['Student',document.getElementById('bdsExportStudent').value ? (document.getElementById('bdsExportStudent').selectedOptions[0]?.textContent || 'Selected student') : 'All'],
         ['Class',document.getElementById('bdsExportClass').value || 'All'],
         ['Section',document.getElementById('bdsExportSection').value === '__none__' ? 'No Section' : (document.getElementById('bdsExportSection').value || 'All')],
         ['Subject',document.getElementById('bdsExportSubject').value || 'All'],
