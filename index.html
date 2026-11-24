@@ -1348,7 +1348,7 @@
   <div class="modal-content bds-export-modal">
     <div class="bds-export-header"><div><h3 id="bds-export-title">Export Center</h3><p>Export fresh student records with school-level permissions. <span data-bds-export-policy></span></p></div><button type="button" class="modal-btn cancel" onclick="closeExportModal()" aria-label="Close Export Center">✕</button></div>
     <div class="bds-export-fields">
-      <label>Format<select id="bdsExportFormat"><option value="csv">CSV (.csv)</option><option value="xlsx">Excel workbook (.xlsx)</option><option value="pdf">PDF (Save as PDF)</option></select></label>
+      <label>Format<select id="bdsExportFormat" onchange="bdsUpdateExportPreview()"><option value="csv">CSV (.csv)</option><option value="xlsx">Excel workbook (.xlsx)</option><option value="pdf">PDF (Save as PDF)</option></select></label>
       <label>Class<select id="bdsExportClass" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
       <label>Section<select id="bdsExportSection" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
       <label>Subject<select id="bdsExportSubject" onchange="bdsUpdateExportPreview()"><option value="">All</option></select></label>
@@ -1356,6 +1356,8 @@
     </div>
     <p class="bds-export-note">With a subject selected, Result Grade filters that subject. Otherwise it filters the student's overall grade. Only assessed subject rows are exported. The latest server records are fetched before each export.</p>
     <p class="bds-export-count" id="bdsExportCount" aria-live="polite"></p>
+    <p class="bds-export-note" id="bdsExportPreviewDetails" aria-live="polite"></p>
+    <p class="bds-export-note">Report layout is selected automatically: Class Register, Subject Register, or Individual Student Assessment. CSV, XLSX and PDF use the same report structure; logos and page footer appear only in PDF.</p>
     <div class="modal-actions"><button type="button" class="modal-btn cancel" onclick="bdsOpenExportOwner()">Owner settings</button><button type="button" class="modal-btn cancel" onclick="closeExportModal()">Cancel</button><button type="button" class="modal-btn save" id="bdsExportRun" onclick="handleExport()">Prepare Export</button></div>
   </div>
 </div>
@@ -3603,7 +3605,7 @@ async function checkDuplicateRollNo() {
     }
 }
 
-// BDS Export Center 2.1.9. All routines live in the existing index.html.
+// BDS Export Center 2.2.0. Shared adaptive report definition lives in the authoritative index.html.
 let bdsExportPolicy = false;
 let bdsExportBusy = false;
 const bdsExportGrades = ['A+','A','B+','B','C','D','F'];
@@ -3725,31 +3727,109 @@ function bdsFilteredExportStudents() {
         return {student,assessed,matched,summary,parts};
     }).filter(Boolean);
 }
-function bdsUpdateExportPreview() {
-    const count=bdsFilteredExportStudents().length;
-    const label=document.getElementById('bdsExportCount');
-    if(label) label.textContent=count+' matching student'+(count===1?'':'s')+' in the loaded snapshot. Export refreshes data first.';
+// A single, format-independent report definition for CSV, XLSX, and PDF.
+const BDS_REPORT_LAYOUTS = {A:'Class Assessment Register',B:'Subject Performance Register',C:'Individual Student Assessment'};
+function bdsReportSort(a,b) {
+    const x=a.student,y=b.student;
+    for (const [l,r] of [[a.parts.klass,b.parts.klass],[a.parts.section,b.parts.section],[x.rollNumber,y.rollNumber],[x.studentName,y.studentName]]) {
+        const n=String(l||'').localeCompare(String(r||''),undefined,{numeric:true,sensitivity:'base'});
+        if(n)return n;
+    }
+    return String(x.recordId||'').localeCompare(String(y.recordId||''));
 }
-const bdsExportColumns=['Record ID','Roll Number','Student Name','Father Name','Class','Section','Academic Session','Report Term',
- 'Subject','Maximum Marks','Obtained Marks','Subject Grade','Subject Percentage','Overall Total','Overall Obtained','Overall Percentage','Overall Grade'];
-function bdsBuildExportRows(selected) {
-    const rows=[bdsExportColumns];
-    const hasSubject=!!document.getElementById('bdsExportSubject').value;
-    selected.forEach(({student,assessed,matched,summary,parts}) => {
-        // No subject filter: one row per assessed subject; unassessed students appear once with empty subject columns.
-        const subjects=hasSubject?matched:(assessed.length?assessed:[null]);
-        subjects.forEach(s => {
-            const marks=s?String(s.marksObtained==null?'':s.marksObtained).trim():'';
-            const percentage=s && Number(s.totalMarks)>0 ? (marks.toUpperCase()==='A'?0:Number(marks))/Number(s.totalMarks)*100 : null;
-            rows.push([student.recordId||'',student.rollNumber||'',student.studentName||'',student.fatherName||'',
-                parts.klass,parts.section,student.academicSession||'',student.reportTerm||student.term||'',
-                s?s.name||'':'',s?Number(s.totalMarks):'',s?marks:'',s?bdsExportGradeForSubject(s):'',
-                percentage==null?'':Number(percentage.toFixed(2)),summary.totalMarks,summary.obtainedMarks,
-                summary.totalMarks?summary.percentage:'',summary.grade==='-'?'':summary.grade]);
+function bdsReportFilters() {
+    return [
+        ['Class',document.getElementById('bdsExportClass').value || 'All'],
+        ['Section',document.getElementById('bdsExportSection').value === '__none__' ? 'No Section' : (document.getElementById('bdsExportSection').value || 'All')],
+        ['Subject',document.getElementById('bdsExportSubject').value || 'All'],
+        ['Result Grade',document.getElementById('bdsExportGrade').value || 'All']
+    ];
+}
+function bdsReportSubjectKey(s) {return String(s.name||'').trim().toLocaleLowerCase();}
+function bdsReportMark(s) {
+    if(!s) return '';
+    const marks=String(s.marksObtained==null?'':s.marksObtained).trim();
+    if(!marks)return '';
+    return marks+'/'+String(s.totalMarks==null?'':s.totalMarks);
+}
+function bdsMakeReportDefinition(selected) {
+    const ordered=selected.slice().sort(bdsReportSort);
+    const filters=bdsReportFilters();
+    const subjectFilter=document.getElementById('bdsExportSubject').value;
+    const layout=subjectFilter?'B':(ordered.length===1?'C':'A');
+    const subjects=[];
+    const seen=new Set();
+    if(layout==='A') {
+        ordered.forEach(item=>item.assessed.forEach(s=>{
+            const key=bdsReportSubjectKey(s);
+            if(key && !seen.has(key)){seen.add(key);subjects.push({key,name:String(s.name).trim()});}
+        }));
+        // Catalogue order first, then stable alphabetical order, including any non-catalogue assessed subjects.
+        const orders=new Map((typeof defaultSubjects!=='undefined'?defaultSubjects:[]).map((s,i)=>[String(s.name||s.subject||'').trim().toLowerCase(),i]));
+        subjects.sort((a,b)=>(orders.get(a.key)??1000)-(orders.get(b.key)??1000)||a.name.localeCompare(b.name,undefined,{numeric:true}));
+    }
+    let columns=[], rows=[], identity=null, totals=null;
+    if(layout==='A') {
+        columns=['Roll Number','Student Name','Class','Section',...subjects.map(s=>s.name),'Overall Percentage','Overall Grade'];
+        rows=ordered.map(item=>{
+            const byName=new Map(item.assessed.map(s=>[bdsReportSubjectKey(s),s]));
+            return [item.student.rollNumber||'',item.student.studentName||'',item.parts.klass,item.parts.section,
+                ...subjects.map(subject=>bdsReportMark(byName.get(subject.key))),
+                item.summary.totalMarks ? item.summary.percentage+'%' : '',item.summary.grade==='-'?'':item.summary.grade];
         });
-    });
+    } else if(layout==='B') {
+        columns=['Roll Number','Student Name','Class','Section','Subject','Obtained Marks','Maximum Marks','Subject Percentage','Subject Grade'];
+        rows=ordered.map(item=>{
+            const s=item.matched.find(x=>bdsReportSubjectKey(x)===String(subjectFilter).trim().toLowerCase())||item.matched[0];
+            const marks=String(s.marksObtained==null?'':s.marksObtained).trim();
+            const value=marks.toUpperCase()==='A'?0:Number(marks);
+            const pct=Number(s.totalMarks)>0?(value/Number(s.totalMarks)*100).toFixed(2)+'%':'';
+            return [item.student.rollNumber||'',item.student.studentName||'',item.parts.klass,item.parts.section,
+                String(s.name||''),marks,Number(s.totalMarks),pct,bdsExportGradeForSubject(s)];
+        });
+    } else {
+        const item=ordered[0];
+        identity=[['Student Name',item.student.studentName||''],['Roll Number',item.student.rollNumber||''],
+            ['Class',item.parts.klass],['Section',item.parts.section||'No Section'],
+            ['Academic Session',item.student.academicSession||''],['Report Term',item.student.reportTerm||item.student.term||'']];
+        columns=['Subject','Obtained Marks','Maximum Marks','Subject Percentage','Subject Grade'];
+        rows=item.assessed.map(s=>{
+            const marks=String(s.marksObtained==null?'':s.marksObtained).trim();
+            const val=marks.toUpperCase()==='A'?0:Number(marks);
+            return [String(s.name||''),marks,Number(s.totalMarks),Number(s.totalMarks)>0?(val/Number(s.totalMarks)*100).toFixed(2)+'%':'',bdsExportGradeForSubject(s)];
+        });
+        totals=[['Overall Percentage',item.summary.totalMarks?item.summary.percentage+'%':''],
+            ['Overall Grade',item.summary.grade==='-'?'':item.summary.grade],
+            ['Total Obtained',item.summary.obtainedMarks],['Total Maximum',item.summary.totalMarks]];
+    }
+    return {layout,title:BDS_REPORT_LAYOUTS[layout],filters,studentCount:ordered.length,
+        subjectCount:layout==='A'?subjects.length:(layout==='B'?1:(ordered[0]?.assessed.length||0)),
+        columns,rows,identity,totals,subjects,generated:new Date().toLocaleString()};
+}
+function bdsReportTabularRows(report) {
+    const rows=[];
+    if(report.identity) { rows.push(['Student Assessment', '']);report.identity.forEach(pair=>rows.push(pair));rows.push([]); }
+    rows.push(report.columns);
+    report.rows.forEach(row=>rows.push(row));
+    if(report.totals){rows.push([]);report.totals.forEach(pair=>rows.push(pair));}
     return rows;
 }
+function bdsUpdateExportPreview() {
+    const selected=bdsFilteredExportStudents();
+    const label=document.getElementById('bdsExportCount');
+    if(!label)return;
+    const fmt=document.getElementById('bdsExportFormat').value;
+    const detail=document.getElementById('bdsExportPreviewDetails');
+    if(!selected.length){label.textContent='No matching students in the loaded snapshot. Adjust filters before exporting.';if(detail)detail.textContent='No report will be created for this selection.';return;}
+    const report=bdsMakeReportDefinition(selected);
+    const panels=report.layout==='A' ? Math.max(1,Math.ceil(report.subjectCount/6)) : 1;
+    label.textContent=report.title+' | '+report.studentCount+' student'+(report.studentCount===1?'':'s')+
+        ' | '+report.subjectCount+' subject'+(report.subjectCount===1?'':'s')+
+        ' | '+fmt.toUpperCase()+(fmt==='pdf'&&panels>1?' | '+panels+' subject-column panels':'')+
+        '. Preview uses loaded records; export refreshes data before generation.';
+    if(detail)detail.textContent='Applied: '+(report.filters.filter(item=>item[1]!=='All').map(item=>item[0]+' '+item[1]).join(' | ')||'All students')+' | Student order: Class, Section, Roll Number | '+(report.layout==='A'?'One student per row.':report.layout==='B'?'One student per row for the selected subject.':'Assessed subjects listed once under student details.');
+}
+
 function bdsExportSafeCell(value) {
     // Protect CSV and spreadsheet consumers from cells interpreted as formulas.
     const valueText=String(value==null?'':value);
@@ -3793,78 +3873,68 @@ function bdsZipStore(files) {
     const end=block(22,v=>{v.setUint32(0,0x06054b50,true);v.setUint16(8,files.length,true);v.setUint16(10,files.length,true);v.setUint32(12,centralSize,true);v.setUint32(16,start,true);});
     return new Blob([...locals,...centrals,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 }
-function bdsDownloadXLSX(rows,selected,filename) {
-    const selectedFilters=['Class','Section','Subject','Grade'].map((label,i)=>[label,document.getElementById(['bdsExportClass','bdsExportSection','bdsExportSubject','bdsExportGrade'][i]).value||'All']);
-    const meta=[['BDS Student Export',''],['Generated',new Date().toLocaleString()],['Matching students',selected.length],
-        ['Grade rule','Subject grade when Subject selected; otherwise overall student grade'],...selectedFilters];
+function bdsDownloadXLSX(rows, filename) {
+    // One worksheet exactly matching the CSV and PDF report definition.
     const files=[
-        ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'],
+        ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'],
         ['_rels/.rels','<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
-        ['xl/workbook.xml','<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Students" sheetId="1" r:id="rId1"/><sheet name="Export Details" sheetId="2" r:id="rId2"/></sheets></workbook>'],
-        ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/></Relationships>'],
-        ['xl/worksheets/sheet1.xml',bdsXlsxSheet(rows)],['xl/worksheets/sheet2.xml',bdsXlsxSheet(meta)]
+        ['xl/workbook.xml','<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Report" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+        ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'],
+        ['xl/worksheets/sheet1.xml',bdsXlsxSheet(rows)]
     ];
     bdsDownloadBlob(bdsZipStore(files),filename);
 }
-function bdsExportPDF(rows, selected, win) {
+function bdsExportPDF(report, win) {
     if (!win || win.closed) throw new Error('The print window was blocked. Allow pop-ups and retry.');
-    const filterItems = ['Class','Section','Subject','Result grade'].map((label,i) => ({
-        label, value: document.getElementById(['bdsExportClass','bdsExportSection','bdsExportSubject','bdsExportGrade'][i]).value || 'All'
-    }));
-    const safe = escapeHTML;
-    const pdfIndexes = [1,2,4,5,8,9,10,11,12,15,16];
-    const pdfRows = rows.map(row => pdfIndexes.map(i => row[i]));
-    const generated = new Date().toLocaleString();
-    // Existing official school logos. Both are reused from the project's current image source.
-    const logoOne = new URL('images/SZABIST_LOGO.png', document.baseURI).href;
-    const logoTwo = new URL('images/BDS-Logo.png', document.baseURI).href;
-    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BDS | Student Assessment Export</title>
+    const safe=escapeHTML;
+    const logoOne=new URL('images/SZABIST_LOGO.png', document.baseURI).href;
+    const logoTwo=new URL('images/BDS-Logo.png', document.baseURI).href;
+    // Column panels keep identity and overall columns legible when many subjects are present.
+    let panels=[];
+    if(report.layout==='A') {
+        const all=report.subjects;
+        const n=Math.max(1,Math.ceil(all.length/6));
+        for(let p=0;p<n;p++){
+            const from=p*6, to=Math.min(all.length,from+6);
+            const indexes=[0,1,2,3,...Array.from({length:to-from},(_,i)=>4+from+i),report.columns.length-2,report.columns.length-1];
+            panels.push({title:n>1?'Subject group '+(p+1)+' of '+n:'',columns:indexes.map(i=>report.columns[i]),rows:report.rows.map(row=>indexes.map(i=>row[i]))});
+        }
+    }else panels=[{title:'',columns:report.columns,rows:report.rows}];
+    const panelMarkup=panels.map((panel,i)=>`<section class="bds-pdf-panel" ${i?'style="break-before:page"':''}>
+      ${panel.title?'<h2>'+safe(panel.title)+'</h2>':''}
+      <table><thead><tr>${panel.columns.map(c=>'<th scope="col">'+safe(c)+'</th>').join('')}</tr></thead>
+      <tbody>${panel.rows.map(row=>'<tr>'+row.map(cell=>'<td>'+safe(cell==null?'':cell)+'</td>').join('')+'</tr>').join('')}</tbody></table>
+    </section>`).join('');
+    const identity=report.identity?'<section class="bds-pdf-identity">'+report.identity.map(pair=>'<div><small>'+safe(pair[0])+'</small><strong>'+safe(pair[1])+'</strong></div>').join('')+'</section>':'';
+    const totals=report.totals?'<section class="bds-pdf-totals">'+report.totals.map(pair=>'<div><small>'+safe(pair[0])+'</small><strong>'+safe(pair[1])+'</strong></div>').join('')+'</section>':'';
+    const filters=report.filters.filter(f=>f[1]!=='All');
+    const filtersMarkup=filters.length?filters.map(f=>'<span class="bds-pdf-filter"><strong>'+safe(f[0])+':</strong> '+safe(f[1])+'</span>').join(''):'<span class="bds-pdf-filter">All student records</span>';
+    const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BDS | ${safe(report.title)}</title>
     <style>
-    :root{font-family:Inter,Arial,"Noto Nastaliq Urdu","Noto Sans Arabic",sans-serif;color:#193a4f;background:#f0f4f6}
-    *{box-sizing:border-box}body{margin:0} .bds-pdf-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 24px;background:#12384c;color:white;position:sticky;top:0;z-index:5}
-    .bds-pdf-toolbar p{margin:4px 0 0;font-size:12px;color:#d4e2e9}.bds-pdf-toolbar button{background:#fff;color:#14384a;border:0;border-radius:9px;padding:12px 17px;font-weight:800;cursor:pointer;min-height:44px}
-    .bds-pdf-toolbar button:focus-visible{outline:3px solid #e5b365;outline-offset:3px}
-    .bds-pdf-document{max-width:1250px;margin:24px auto;background:#fff;padding:24px 28px 36px;box-shadow:0 12px 35px #1f44551a}
-    .bds-pdf-header{display:grid;grid-template-columns:74px minmax(0,1fr) 74px;align-items:center;gap:20px;padding-bottom:18px;border-bottom:4px double #27767d;text-align:center}
-    .bds-pdf-logo{width:70px;height:70px;object-fit:contain}.bds-pdf-header h1{font-size:21px;letter-spacing:.03em;margin:0;color:#163e53}
-    .bds-pdf-header p{margin:5px 0 0;color:#617887;font-size:12px}
-    .bds-pdf-meta{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:15px 0;font-size:11px;color:#426272}
-    .bds-pdf-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.bds-pdf-filter{border:1px solid #d2e4e7;border-radius:8px;background:#f3f9f9;padding:7px 10px;font-size:11px}
-    .bds-pdf-filter strong{color:#225f69}table{border-collapse:collapse;width:100%;font-size:9px;table-layout:auto}
-    th,td{text-align:left;padding:8px 7px;border-bottom:1px solid #dbe5e9;vertical-align:top;overflow-wrap:anywhere}
-    th{background:#18455b;color:white;font-weight:700}tbody tr:nth-child(even){background:#f5f9fa}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}
-    .bds-pdf-note{font-size:10px;color:#657f89;margin-top:16px}.bds-pdf-footer{margin-top:18px;border-top:1px solid #bfd5d8;padding-top:10px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:10px;color:#647e8a}
-    .bds-pdf-footer img{width:23px;height:23px;object-fit:contain;vertical-align:middle;margin-right:6px}.bds-pdf-page:after{content:counter(page)}
-    @page{size:A4 landscape;margin:14mm 11mm 19mm;
-      @bottom-left{content:"BDS Report Card System";font:9px Arial,sans-serif;color:#647e8a}
-      @bottom-center{content:"Confidential school assessment data";font:9px Arial,sans-serif;color:#647e8a}
-      @bottom-right{content:"Page " counter(page) " of " counter(pages);font:9px Arial,sans-serif;color:#647e8a}
-    }
-    @media print{html,body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.bds-pdf-toolbar{display:none!important}.bds-pdf-document{max-width:none;margin:0;padding:0;box-shadow:none}.bds-pdf-header{padding-top:0}.bds-pdf-footer{position:static;margin-top:14px;break-inside:avoid;background:#fff}table{font-size:8px}th,td{padding:5px 4px}}
-    @media(max-width:650px){.bds-pdf-toolbar{padding:12px;flex-wrap:wrap}.bds-pdf-document{margin:0;padding:14px;overflow-x:auto}.bds-pdf-header{grid-template-columns:48px 1fr 48px;gap:8px}.bds-pdf-logo{width:46px;height:46px}.bds-pdf-header h1{font-size:15px}table{min-width:800px}}
-    </style></head><body>
-    <div class="bds-pdf-toolbar"><div><strong>BDS Student Export</strong><p>Prepared report. You can print or save as PDF again without refreshing the main application.</p></div><button type="button" id="bds-print-pdf" onclick="window.print()">Print / Save as PDF</button></div>
-    <main class="bds-pdf-document"><header class="bds-pdf-header"><img class="bds-pdf-logo" src="${logoOne}" alt="SZABIST logo"><div><h1>BDS STUDENT ASSESSMENT REPORT</h1><p>Official school data export | Academic assessment register</p></div><img class="bds-pdf-logo" src="${logoTwo}" alt="BDS logo"></header>
-    <div class="bds-pdf-meta"><strong>${selected.length} student${selected.length===1?'':'s'} included</strong><span>Prepared: ${safe(generated)}</span><span>Document: Student assessment export</span></div>
-    <section class="bds-pdf-filters" aria-label="Applied filters">${filterItems.map(f=>`<span class="bds-pdf-filter"><strong>${safe(f.label)}:</strong> ${safe(f.value==='__none__'?'No Section':f.value)}</span>`).join('')}</section>
-    <table><thead><tr>${pdfRows[0].map(c=>'<th scope="col">'+safe(c)+'</th>').join('')}</tr></thead><tbody>${pdfRows.slice(1).map(row=>'<tr>'+row.map(c=>'<td>'+safe(c)+'</td>').join('')+'</tr>').join('')}</tbody></table>
-    <p class="bds-pdf-note">Result grade refers to the selected subject when a subject filter is applied; otherwise it refers to the overall assessed grade. Unassessed subjects are not included.</p>
-    <footer class="bds-pdf-footer"><span><img src="${logoTwo}" alt=""> BDS Report Card System</span><span>Confidential school assessment data</span><span>Prepared ${safe(generated)}</span></footer>
-    </main></body></html>`;
-    win.document.open(); win.document.write(html); win.document.close();
-    win.focus();
-    // Browsers may suppress a later automatic print call. The visible button above
-    // is always available for reliable repeat printing from a direct user gesture.
-    setTimeout(() => {
-        if (win.closed) return;
-        const imageReady = Array.from(win.document.images || []).map(img => img.complete ? Promise.resolve() :
-            new Promise(resolve => { img.addEventListener('load', resolve, {once:true}); img.addEventListener('error', resolve, {once:true}); }));
-        Promise.race([Promise.all([win.document.fonts ? win.document.fonts.ready : Promise.resolve(), ...imageReady]),
-            new Promise(resolve => setTimeout(resolve, 2500))]).then(() => {
-                if (!win.closed) { try { win.focus(); win.print(); } catch (error) { /* Manual button remains available */ } }
-            });
-    }, 400);
-    showMessage('PDF report prepared. Use Print / Save as PDF in its window if the dialog does not appear automatically.', 'success');
+      :root{font-family:Inter,Arial,"Noto Nastaliq Urdu","Noto Sans Arabic",sans-serif;color:#193a4f;background:#edf3f6}
+      *{box-sizing:border-box}body{margin:0}.bds-pdf-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 24px;background:#12384c;color:white;position:sticky;top:0;z-index:5}.bds-pdf-toolbar p{margin:3px 0 0;font-size:12px;color:#d4e2e9}.bds-pdf-toolbar button{background:#fff;color:#14384a;border:0;border-radius:9px;padding:12px 17px;font-weight:800;cursor:pointer;min-height:44px}
+      .bds-pdf-document{max-width:1250px;margin:24px auto;background:white;padding:24px 28px 30px;box-shadow:0 12px 35px #1f44551a}
+      .bds-pdf-header{display:grid;grid-template-columns:74px minmax(0,1fr) 74px;align-items:center;gap:16px;padding-bottom:14px;border-bottom:3px double #27767d;text-align:center}.bds-pdf-logo{width:68px;height:68px;object-fit:contain}.bds-pdf-header h1{font-size:19px;letter-spacing:.02em;margin:0;color:#163e53}.bds-pdf-header p{margin:5px 0 0;color:#617887;font-size:11px}
+      .bds-pdf-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:13px 0;font-size:11px;color:#426272}.bds-pdf-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.bds-pdf-filter{border:1px solid #d2e4e7;border-radius:6px;background:#f3f9f9;padding:6px 9px;font-size:10px}
+      table{border-collapse:collapse;width:100%;font-size:9px}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #dbe5e9;vertical-align:top;overflow-wrap:break-word}th{background:#18455b;color:white;font-weight:700}tbody tr:nth-child(even){background:#f5f9fa}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}
+      .bds-pdf-panel h2{font-size:13px;color:#225f69;margin:13px 0 9px}.bds-pdf-identity,.bds-pdf-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}.bds-pdf-identity div,.bds-pdf-totals div{background:#f3f9fa;border:1px solid #dce9ed;padding:8px;border-radius:5px}.bds-pdf-identity small,.bds-pdf-totals small{display:block;font-size:9px;color:#637988}.bds-pdf-identity strong,.bds-pdf-totals strong{display:block;font-size:12px;margin-top:2px}
+      .bds-pdf-note{font-size:9px;color:#657f89;margin-top:13px}.bds-pdf-footer{margin-top:14px;border-top:1px solid #bfd5d8;padding-top:9px;display:flex;justify-content:space-between;font-size:9px;color:#647e8a}
+      @page{size:A4 landscape;margin:14mm 11mm 18mm;@bottom-left{content:"BDS Report Card System";font:9px Arial;color:#647e8a}@bottom-center{content:"Confidential school assessment data";font:9px Arial;color:#647e8a}@bottom-right{content:"Page " counter(page) " of " counter(pages);font:9px Arial;color:#647e8a}}
+      @media print{html,body{background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.bds-pdf-toolbar{display:none!important}.bds-pdf-document{margin:0;max-width:none;padding:0;box-shadow:none}.bds-pdf-footer{display:none}.bds-pdf-panel{break-before:auto}table{font-size:8px}td,th{padding:5px 4px}}
+      @media(max-width:650px){.bds-pdf-toolbar{padding:12px;flex-wrap:wrap}.bds-pdf-document{margin:0;padding:14px;overflow-x:auto}.bds-pdf-header{grid-template-columns:44px 1fr 44px;gap:6px}.bds-pdf-logo{width:42px;height:42px}.bds-pdf-header h1{font-size:15px}table{min-width:750px}}
+    </style></head><body><div class="bds-pdf-toolbar"><div><strong>BDS ${safe(report.title)}</strong><p>Use Print / Save as PDF as often as necessary, without refreshing the main application.</p></div><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+    <main class="bds-pdf-document"><header class="bds-pdf-header"><img class="bds-pdf-logo" src="${safe(logoOne)}" alt="SZABIST logo"><div><h1>${safe(report.title.toUpperCase())}</h1><p>Official school assessment export</p></div><img class="bds-pdf-logo" src="${safe(logoTwo)}" alt="BDS logo"></header>
+    <div class="bds-pdf-meta"><strong>${report.studentCount} student${report.studentCount===1?'':'s'} | ${report.subjectCount} assessed subject${report.subjectCount===1?'':'s'}</strong><span>Prepared: ${safe(report.generated)}</span><span>Document: ${safe(report.title)}</span></div>
+    <section class="bds-pdf-filters" aria-label="Applied filters">${filtersMarkup}</section>${identity}${panelMarkup}${totals}
+    <p class="bds-pdf-note">Blank subject results mean unassessed; 0 is an entered mark; A denotes absent. Subject grades are used when a subject filter is active, otherwise overall grades apply.</p>
+    <footer class="bds-pdf-footer"><span>BDS Report Card System</span><span>Confidential school assessment data</span><span>${safe(report.generated)}</span></footer></main></body></html>`;
+    win.document.open();win.document.write(html);win.document.close();win.focus();
+    setTimeout(()=>{
+        if(win.closed)return;
+        const images=Array.from(win.document.images||[]).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});}));
+        Promise.race([Promise.all([win.document.fonts?win.document.fonts.ready:Promise.resolve(),...images]),new Promise(r=>setTimeout(r,2500))]).then(()=>{if(!win.closed)try{win.focus();win.print();}catch(e){/* Manual button remains available */}});
+    },400);
+    showMessage('PDF '+report.title+' prepared. Its Print / Save as PDF button works for repeat printing.','success');
 }
 
 async function handleExport() {
@@ -3884,13 +3954,14 @@ async function handleExport() {
         bdsPopulateExportFilters();
         const selected=bdsFilteredExportStudents();
         if(!selected.length) throw new Error('No students match these filters.');
-        const rows=bdsBuildExportRows(selected);
+        const report=bdsMakeReportDefinition(selected);
+        const rows=bdsReportTabularRows(report);
         const filename='bds_students_'+new Date().toISOString().slice(0,10)+'.'+format;
         if(format==='csv')downloadCSV(rows.map(row=>row.map(csvCell).join(',')).join('\r\n'),filename);
-        else if(format==='xlsx')bdsDownloadXLSX(rows,selected,filename);
-        else bdsExportPDF(rows,selected,pdfWindow);
+        else if(format==='xlsx')bdsDownloadXLSX(rows,filename);
+        else bdsExportPDF(report,pdfWindow);
         closeExportModal();
-        if(format!=='pdf')showMessage(format.toUpperCase()+' export prepared for '+selected.length+' students.','success');
+        if(format!=='pdf')showMessage(format.toUpperCase()+' '+report.title+' prepared for '+selected.length+' students.','success');
     }catch(error){if(pdfWindow&&!pdfWindow.closed)pdfWindow.close();showMessage('Export not completed: '+error.message,'error');}
     finally{bdsExportBusy=false;button.disabled=false;}
 }
