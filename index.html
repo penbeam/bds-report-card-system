@@ -259,7 +259,9 @@
             font-size: 12px;
         }
 
-        #bds-report-app .form-group input, #bds-report-app .form-group textarea {
+        #bds-report-app .form-group input, #bds-report-app .form-group select, #bds-report-app .form-group textarea {
+            width: 100%;
+            min-width: 0;
             padding: 14px 16px;
             border: 2px solid var(--gray-light);
             border-radius: var(--radius-sm);
@@ -268,7 +270,7 @@
             background: var(--white);
         }
 
-        #bds-report-app .form-group input:focus, #bds-report-app .form-group textarea:focus {
+        #bds-report-app .form-group input:focus, #bds-report-app .form-group select:focus, #bds-report-app .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
@@ -1422,8 +1424,12 @@
                         <input type="text" id="fatherName" placeholder="Enter father's name" value="">
                     </div>
                     <div class="form-group">
-                        <label for="studentClass">Class/Section <span class="required">*</span></label>
-                        <input type="text" id="studentClass" placeholder="e.g., VII-A" value="">
+                        <label for="studentClass">Class <span class="required">*</span></label>
+                        <select id="studentClass" onchange="checkDuplicateRollNo()"><option value="">Select class</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option><option>IX</option><option>X</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentSection">Section (optional)</label>
+                        <select id="studentSection" onchange="checkDuplicateRollNo()"><option value="">No Section</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select>
                     </div>
                     <div class="form-group">
                         <label for="rollNumber">Roll Number <span class="required">*</span></label>
@@ -1551,9 +1557,9 @@
                 <!-- Class Filter Row -->
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label for="gradeFilter">Grade</label>
+                        <label for="gradeFilter">Class</label>
                         <select id="gradeFilter" onchange="updateSectionOptions(); applyFilters();">
-                            <option value="all">All Grades</option>
+                            <option value="all">All Classes</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -1756,7 +1762,7 @@ function debounceCheck() {
         // SINGLE SCHOOL-WIDE CONNECTION SOURCE (configure before publishing to GitHub Pages).
         // Paste the Apps Script production URL ending in /exec below. Do not put credentials here.
         // This public endpoint address is not a secret; access is enforced by Apps Script.
-        const BDS_DEPLOYED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyoxbexnJQp_Tcq73Qhu0GsGQo5ZFQMAWUrk4yDR8OJn-48BfWke91NgE_8WFIIuQNt/exec';
+        const BDS_DEPLOYED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwEDV4r84vgNW5mxkQMI2I1lv6HYQf6K_Pj6H4uYucaxtrX4DlskXDU2OACbSbQicSW/exec';
         let bdsSessionToken = '';
         function bdsValidEndpoint(value) {
             try { const url = new URL(value); return url.protocol === 'https:' &&
@@ -2267,6 +2273,8 @@ function closeDuplicateModal() {
             try {
                 return await jsonpRequest({
                     action: 'checkDuplicate', rollNo: String(rollNumber).trim(),
+                    studentClass: document.getElementById('studentClass').value,
+                    studentSection: document.getElementById('studentSection').value,
                     recordId: isEditMode && editingStudentData ? (editingStudentData.recordId || '') : '',
                     currentTimestamp: isEditMode ? (editingStudentTimestamp || '') : ''
                 });
@@ -2366,6 +2374,7 @@ function hideSaveLoading() {
                     studentName: document.getElementById('studentName').value.trim(),
                     fatherName: document.getElementById('fatherName').value.trim(),
                     studentClass: document.getElementById('studentClass').value.trim(),
+                    studentSection: document.getElementById('studentSection').value,
                     rollNumber: document.getElementById('rollNumber').value.trim(),
                     daysAttended: document.getElementById('daysAttended').value,
                     totalWorkingDays: document.getElementById('totalWorkingDays').value,
@@ -2492,13 +2501,8 @@ function hideSaveLoading() {
             const gradeSet = new Set();
             
             students.forEach(student => {
-                const classStr = student.studentClass || '';
-                if (classStr.includes('-')) {
-                    const [grade] = classStr.split('-');
-                    gradeSet.add(grade.trim());
-                } else if (classStr) {
-                    gradeSet.add(classStr.trim());
-                }
+                const klass = String(student.studentClass || '').trim();
+                if (klass) gradeSet.add(klass);
             });
 
             // Sort grades according to gradeOrder
@@ -2510,7 +2514,7 @@ function hideSaveLoading() {
 
             // Populate grade dropdown
             const gradeSelect = document.getElementById('gradeFilter');
-            gradeSelect.innerHTML = '<option value="all">All Grades</option>';
+            gradeSelect.innerHTML = '<option value="all">All Classes</option>';
             sortedGrades.forEach(grade => {
                 const option = document.createElement('option');
                 option.value = grade;
@@ -2542,20 +2546,16 @@ function hideSaveLoading() {
             const sections = new Set();
             
             students.forEach(student => {
-                const classStr = student.studentClass || '';
-                if (classStr.includes('-')) {
-                    const [grade, section] = classStr.split('-');
-                    if (grade === selectedGrade) {
-                        sections.add(section.trim());
-                    }
+                if (student.studentClass === selectedGrade) {
+                    sections.add(String(student.studentSection || '').trim());
                 }
             });
 
             // Add section options
             Array.from(sections).sort().forEach(section => {
                 const option = document.createElement('option');
-                option.value = section;
-                option.textContent = section;
+                option.value = section === '' ? '__none__' : section;
+                option.textContent = section === '' ? 'No Section' : section;
                 sectionSelect.appendChild(option);
             });
         }
@@ -2572,7 +2572,7 @@ function updateDashboardMetrics() {
 
     students.forEach(student => {
         const summary = calculateStudentSummary(student.subjects || []);
-        const className = String(student.studentClass || 'Unspecified');
+        const className = bdsClassLabel(student.studentClass, student.studentSection) || 'Unspecified';
         if (!classStats[className]) classStats[className] = { count: 0, assessed: 0, percentageSum: 0, passed: 0 };
         classStats[className].count++;
 
@@ -2673,7 +2673,7 @@ function renderDashboardInsights(gradeCounts, classStats, assessedStudents, subj
             // Show active filters
             const activeFiltersDiv = document.getElementById('activeFilters');
             let filterText = [];
-            if (grade !== 'all') filterText.push(`Grade: ${grade}`);
+            if (grade !== 'all') filterText.push(`Class: ${grade}`);
             if (section !== 'all') filterText.push(`Section: ${section}`);
             if (rollNo) filterText.push(`Roll No: ${rollNo}`);
             
@@ -2701,22 +2701,14 @@ function renderDashboardInsights(gradeCounts, classStats, assessedStudents, subj
                 // Filter by grade
                 if (grade !== 'all') {
                     results = results.filter(s => {
-                        const classStr = s.studentClass || '';
-                        if (classStr.includes('-')) {
-                            return classStr.split('-')[0].trim() === grade;
-                        }
-                        return classStr === grade;
+                        return String(s.studentClass || '').trim() === grade;
                     });
                 }
 
                 // Filter by section
                 if (section !== 'all') {
                     results = results.filter(s => {
-                        const classStr = s.studentClass || '';
-                        if (classStr.includes('-')) {
-                            return classStr.split('-')[1].trim() === section;
-                        }
-                        return false; // Grade-only classes don't match section filter
+                        return section === '__none__' ? !s.studentSection : String(s.studentSection || '').trim() === section;
                     });
                 }
 
@@ -2742,12 +2734,12 @@ function renderDashboardInsights(gradeCounts, classStats, assessedStudents, subj
         // Clear specific filter
         // =============================================
         function clearFilter(filterType) {
-            if (filterType === 'grade') {
+            if (filterType === 'grade' || filterType === 'class') {
                 document.getElementById('gradeFilter').value = 'all';
                 updateSectionOptions();
             } else if (filterType === 'section') {
                 document.getElementById('sectionFilter').value = 'all';
-            } else if (filterType === 'roll') {
+            } else if (filterType === 'roll' || filterType === 'roll no') {
                 document.getElementById('searchRollNo').value = '';
             }
             applyFilters();
@@ -2824,7 +2816,7 @@ function renderCurrentPage() {
                 <td>${escapeHTML(student.rollNumber || 'N/A')}</td>
                 <td>${escapeHTML(student.studentName || 'N/A')}</td>
                 <td>${escapeHTML(student.fatherName || 'N/A')}</td>
-                <td>${escapeHTML(student.studentClass || 'N/A')}</td>
+                <td>${escapeHTML(bdsClassLabel(student.studentClass,student.studentSection) || 'N/A')}</td>
                 <td>${escapeHTML(student.reportTerm || student.term || 'N/A')}</td>
                 <td>${escapeHTML(student.academicSession || '2025-26')}</td>
                 <td>${escapeHTML(date)}</td>
@@ -2962,6 +2954,7 @@ function jumpToPage(page) {
             document.getElementById('studentName').value = student.studentName || '';
             document.getElementById('fatherName').value = student.fatherName || '';
             document.getElementById('studentClass').value = student.studentClass || '';
+            document.getElementById('studentSection').value = student.studentSection || '';
             document.getElementById('rollNumber').value = student.rollNumber || '';
             document.getElementById('daysAttended').value = student.daysAttended == null ? '' : student.daysAttended;
             document.getElementById('totalWorkingDays').value = student.totalWorkingDays == null || student.totalWorkingDays === '' ? '90' : student.totalWorkingDays;
@@ -3110,7 +3103,7 @@ function jumpToPage(page) {
             
             const studentName = document.getElementById('studentName').value || '';
             const fatherName = document.getElementById('fatherName').value || '';
-            const studentClass = document.getElementById('studentClass').value || '';
+            const studentClass = bdsClassLabel(document.getElementById('studentClass').value, document.getElementById('studentSection').value);
             const rollNo = document.getElementById('rollNumber').value || '';
             const daysAttended = document.getElementById('daysAttended').value || '';
             const totalDays = document.getElementById('totalWorkingDays').value || '90';
@@ -3507,6 +3500,7 @@ font-weight: 600;
     document.getElementById('studentName').value = '';
     document.getElementById('fatherName').value = '';
     document.getElementById('studentClass').value = '';
+    document.getElementById('studentSection').value = '';
     document.getElementById('rollNumber').value = '';
     document.getElementById('daysAttended').value = '';
     document.getElementById('totalWorkingDays').value = '90';
@@ -3571,7 +3565,7 @@ font-weight: 600;
 async function checkDuplicateRollNo() {
     const rollInput = document.getElementById('rollNumber');
     const rollNo = rollInput.value.trim();
-    if (!rollNo) {
+    if (!rollNo || !document.getElementById('studentClass').value) {
         rollInput.style.borderColor = '';
         rollInput.style.backgroundColor = '';
         const btnSave = document.getElementById('btnSave');
@@ -3609,7 +3603,7 @@ async function checkDuplicateRollNo() {
     }
 }
 
-// BDS Export Center 2.1.8. All routines live in the existing index.html.
+// BDS Export Center 2.1.9. All routines live in the existing index.html.
 let bdsExportPolicy = false;
 let bdsExportBusy = false;
 const bdsExportGrades = ['A+','A','B+','B','C','D','F'];
@@ -3675,10 +3669,9 @@ async function bdsSaveExportPolicy(event) {
     } catch(error) { showMessage('Could not change export availability: '+error.message,'error'); }
     finally { passField.value=''; bdsExportBusy=false; button.disabled=false; }
 }
+function bdsClassLabel(klass,section) { return String(klass||'')+(section?'-'+section:''); }
 function bdsClassParts(student) {
-    const v=String(student.studentClass||'').trim();
-    const i=v.indexOf('-');
-    return i<0?{klass:v,section:''}:{klass:v.slice(0,i).trim(),section:v.slice(i+1).trim()};
+    return {klass:String(student.studentClass||'').trim(),section:String(student.studentSection||'').trim()};
 }
 function bdsAssessedSubjects(student) {
     return (student.subjects||[]).filter(s => {
@@ -3698,13 +3691,13 @@ function bdsPopulateExportFilters() {
     students.forEach(student => {
         const parts=bdsClassParts(student);
         if(parts.klass) choices.bdsExportClass.add(parts.klass);
-        if(parts.section) choices.bdsExportSection.add(parts.section);
+        choices.bdsExportSection.add(parts.section || '__none__');
         bdsAssessedSubjects(student).forEach(s=>{if(s.name) choices.bdsExportSubject.add(String(s.name).trim());});
     });
     Object.keys(choices).forEach(id => {
         const select=document.getElementById(id), selected=select.value;
         select.replaceChildren(new Option('All',''));
-        Array.from(choices[id]).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach(v=>select.add(new Option(v,v)));
+        Array.from(choices[id]).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach(v=>select.add(new Option(v==='__none__'?'No Section':v,v)));
         // Never widen a user's explicit filter if fresh data no longer contains it.
         if(selected) {
             if(!choices[id].has(selected))select.add(new Option(selected+' (not in refreshed data)',selected));
@@ -3721,7 +3714,7 @@ function bdsFilteredExportStudents() {
     return (bdsAuthoritativeStudents||[]).map(student => {
         const parts=bdsClassParts(student);
         if (klass && parts.klass!==klass) return null;
-        if (section && parts.section!==section) return null;
+        if (section && (parts.section || '__none__')!==section) return null;
         const assessed=bdsAssessedSubjects(student);
         const matched=subject?assessed.filter(s=>String(s.name||'').trim()===subject):assessed;
         if (subject && !matched.length) return null;
@@ -3813,19 +3806,67 @@ function bdsDownloadXLSX(rows,selected,filename) {
     ];
     bdsDownloadBlob(bdsZipStore(files),filename);
 }
-function bdsExportPDF(rows,selected,win) {
-    // Browser print keeps installed Urdu/Sindhi fonts and creates a genuine PDF via Save as PDF.
-    if(!win || win.closed) throw new Error('The print window was blocked. Allow pop-ups and retry.');
-    const filterText=['Class','Section','Subject','Grade'].map((label,i)=>label+': '+(document.getElementById(['bdsExportClass','bdsExportSection','bdsExportSubject','bdsExportGrade'][i]).value||'All')).join(' | ');
-    const escape=escapeHTML;
-    const pdfIndexes=[1,2,4,5,8,9,10,11,12,15,16];
-    const pdfRows=rows.map(row=>pdfIndexes.map(i=>row[i]));
-    const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>BDS Student Export</title><style>body{font-family:Arial,"Noto Nastaliq Urdu","Noto Sans Arabic",sans-serif;color:#17374a;margin:24px}h1{font-size:20px}p{font-size:11px}table{width:100%;border-collapse:collapse;font-size:9px}th,td{border:1px solid #b9cbd1;padding:6px;overflow-wrap:anywhere;text-align:left}th{background:#e9f2f4}tr{break-inside:avoid}@page{size:A4 landscape;margin:12mm}@media print{body{margin:0}}</style></head><body><h1>BDS Student Export</h1><p>'+escape(new Date().toLocaleString())+' | '+selected.length+' students</p><p>'+escape(filterText)+'</p><p>Grade filter uses subject grades if a subject is selected, otherwise overall grades.</p><table><thead><tr>'+pdfRows[0].map(c=>'<th>'+escape(c)+'</th>').join('')+'</tr></thead><tbody>'+pdfRows.slice(1).map(row=>'<tr>'+row.map(c=>'<td>'+escape(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table></body></html>';
-    win.document.open();win.document.write(html);win.document.close();
+function bdsExportPDF(rows, selected, win) {
+    if (!win || win.closed) throw new Error('The print window was blocked. Allow pop-ups and retry.');
+    const filterItems = ['Class','Section','Subject','Result grade'].map((label,i) => ({
+        label, value: document.getElementById(['bdsExportClass','bdsExportSection','bdsExportSubject','bdsExportGrade'][i]).value || 'All'
+    }));
+    const safe = escapeHTML;
+    const pdfIndexes = [1,2,4,5,8,9,10,11,12,15,16];
+    const pdfRows = rows.map(row => pdfIndexes.map(i => row[i]));
+    const generated = new Date().toLocaleString();
+    // Existing official school logos. Both are reused from the project's current image source.
+    const logoOne = new URL('images/SZABIST_LOGO.png', document.baseURI).href;
+    const logoTwo = new URL('images/BDS-Logo.png', document.baseURI).href;
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BDS | Student Assessment Export</title>
+    <style>
+    :root{font-family:Inter,Arial,"Noto Nastaliq Urdu","Noto Sans Arabic",sans-serif;color:#193a4f;background:#f0f4f6}
+    *{box-sizing:border-box}body{margin:0} .bds-pdf-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 24px;background:#12384c;color:white;position:sticky;top:0;z-index:5}
+    .bds-pdf-toolbar p{margin:4px 0 0;font-size:12px;color:#d4e2e9}.bds-pdf-toolbar button{background:#fff;color:#14384a;border:0;border-radius:9px;padding:12px 17px;font-weight:800;cursor:pointer;min-height:44px}
+    .bds-pdf-toolbar button:focus-visible{outline:3px solid #e5b365;outline-offset:3px}
+    .bds-pdf-document{max-width:1250px;margin:24px auto;background:#fff;padding:24px 28px 36px;box-shadow:0 12px 35px #1f44551a}
+    .bds-pdf-header{display:grid;grid-template-columns:74px minmax(0,1fr) 74px;align-items:center;gap:20px;padding-bottom:18px;border-bottom:4px double #27767d;text-align:center}
+    .bds-pdf-logo{width:70px;height:70px;object-fit:contain}.bds-pdf-header h1{font-size:21px;letter-spacing:.03em;margin:0;color:#163e53}
+    .bds-pdf-header p{margin:5px 0 0;color:#617887;font-size:12px}
+    .bds-pdf-meta{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:15px 0;font-size:11px;color:#426272}
+    .bds-pdf-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.bds-pdf-filter{border:1px solid #d2e4e7;border-radius:8px;background:#f3f9f9;padding:7px 10px;font-size:11px}
+    .bds-pdf-filter strong{color:#225f69}table{border-collapse:collapse;width:100%;font-size:9px;table-layout:auto}
+    th,td{text-align:left;padding:8px 7px;border-bottom:1px solid #dbe5e9;vertical-align:top;overflow-wrap:anywhere}
+    th{background:#18455b;color:white;font-weight:700}tbody tr:nth-child(even){background:#f5f9fa}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}
+    .bds-pdf-note{font-size:10px;color:#657f89;margin-top:16px}.bds-pdf-footer{margin-top:18px;border-top:1px solid #bfd5d8;padding-top:10px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:10px;color:#647e8a}
+    .bds-pdf-footer img{width:23px;height:23px;object-fit:contain;vertical-align:middle;margin-right:6px}.bds-pdf-page:after{content:counter(page)}
+    @page{size:A4 landscape;margin:14mm 11mm 19mm;
+      @bottom-left{content:"BDS Report Card System";font:9px Arial,sans-serif;color:#647e8a}
+      @bottom-center{content:"Confidential school assessment data";font:9px Arial,sans-serif;color:#647e8a}
+      @bottom-right{content:"Page " counter(page) " of " counter(pages);font:9px Arial,sans-serif;color:#647e8a}
+    }
+    @media print{html,body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.bds-pdf-toolbar{display:none!important}.bds-pdf-document{max-width:none;margin:0;padding:0;box-shadow:none}.bds-pdf-header{padding-top:0}.bds-pdf-footer{position:static;margin-top:14px;break-inside:avoid;background:#fff}table{font-size:8px}th,td{padding:5px 4px}}
+    @media(max-width:650px){.bds-pdf-toolbar{padding:12px;flex-wrap:wrap}.bds-pdf-document{margin:0;padding:14px;overflow-x:auto}.bds-pdf-header{grid-template-columns:48px 1fr 48px;gap:8px}.bds-pdf-logo{width:46px;height:46px}.bds-pdf-header h1{font-size:15px}table{min-width:800px}}
+    </style></head><body>
+    <div class="bds-pdf-toolbar"><div><strong>BDS Student Export</strong><p>Prepared report. You can print or save as PDF again without refreshing the main application.</p></div><button type="button" id="bds-print-pdf" onclick="window.print()">Print / Save as PDF</button></div>
+    <main class="bds-pdf-document"><header class="bds-pdf-header"><img class="bds-pdf-logo" src="${logoOne}" alt="SZABIST logo"><div><h1>BDS STUDENT ASSESSMENT REPORT</h1><p>Official school data export | Academic assessment register</p></div><img class="bds-pdf-logo" src="${logoTwo}" alt="BDS logo"></header>
+    <div class="bds-pdf-meta"><strong>${selected.length} student${selected.length===1?'':'s'} included</strong><span>Prepared: ${safe(generated)}</span><span>Document: Student assessment export</span></div>
+    <section class="bds-pdf-filters" aria-label="Applied filters">${filterItems.map(f=>`<span class="bds-pdf-filter"><strong>${safe(f.label)}:</strong> ${safe(f.value==='__none__'?'No Section':f.value)}</span>`).join('')}</section>
+    <table><thead><tr>${pdfRows[0].map(c=>'<th scope="col">'+safe(c)+'</th>').join('')}</tr></thead><tbody>${pdfRows.slice(1).map(row=>'<tr>'+row.map(c=>'<td>'+safe(c)+'</td>').join('')+'</tr>').join('')}</tbody></table>
+    <p class="bds-pdf-note">Result grade refers to the selected subject when a subject filter is applied; otherwise it refers to the overall assessed grade. Unassessed subjects are not included.</p>
+    <footer class="bds-pdf-footer"><span><img src="${logoTwo}" alt=""> BDS Report Card System</span><span>Confidential school assessment data</span><span>Prepared ${safe(generated)}</span></footer>
+    </main></body></html>`;
+    win.document.open(); win.document.write(html); win.document.close();
     win.focus();
-    setTimeout(()=>{ if(!win.closed) Promise.resolve(win.document.fonts && win.document.fonts.ready).then(()=>{if(!win.closed)win.print();}); },650);
-    showMessage('In the print window, choose Save as PDF to create your PDF.','info');
+    // Browsers may suppress a later automatic print call. The visible button above
+    // is always available for reliable repeat printing from a direct user gesture.
+    setTimeout(() => {
+        if (win.closed) return;
+        const imageReady = Array.from(win.document.images || []).map(img => img.complete ? Promise.resolve() :
+            new Promise(resolve => { img.addEventListener('load', resolve, {once:true}); img.addEventListener('error', resolve, {once:true}); }));
+        Promise.race([Promise.all([win.document.fonts ? win.document.fonts.ready : Promise.resolve(), ...imageReady]),
+            new Promise(resolve => setTimeout(resolve, 2500))]).then(() => {
+                if (!win.closed) { try { win.focus(); win.print(); } catch (error) { /* Manual button remains available */ } }
+            });
+    }, 400);
+    showMessage('PDF report prepared. Use Print / Save as PDF in its window if the dialog does not appear automatically.', 'success');
 }
+
 async function handleExport() {
     if(bdsExportBusy)return;
     const format=document.getElementById('bdsExportFormat').value;
