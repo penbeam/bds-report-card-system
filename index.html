@@ -369,7 +369,7 @@
 
         @media (min-width: 1100px)  {
             #bds-report-app .signatures-grid {
-                grid-template-columns: repeat(4, minmax(0,1fr));
+                grid-template-columns: repeat(5, minmax(0,1fr));
             }
         }
 
@@ -1530,6 +1530,10 @@
                         <input type="text" id="adminSign" placeholder="Signature">
                     </div>
                     <div class="signature-field">
+                        <label for="academicCoordinatorSign">Academic Coordinator</label>
+                        <input type="text" id="academicCoordinatorSign" placeholder="Signature">
+                    </div>
+                    <div class="signature-field">
                         <label for="headMistressSign">Head Mistress</label>
                         <input type="text" id="headMistressSign" placeholder="Signature">
                     </div>
@@ -1795,7 +1799,7 @@ function debounceCheck() {
         // SINGLE SCHOOL-WIDE CONNECTION SOURCE (configure before publishing to GitHub Pages).
         // Paste the Apps Script production URL ending in /exec below. Do not put credentials here.
         // This public endpoint address is not a secret; access is enforced by Apps Script.
-        const BDS_DEPLOYED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwEDV4r84vgNW5mxkQMI2I1lv6HYQf6K_Pj6H4uYucaxtrX4DlskXDU2OACbSbQicSW/exec';
+        const BDS_DEPLOYED_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxrhicTMFTclbTN5wUZNgwOjimT8HeM4FPQzkp_i5L3C2Ac_okdY8c5Fefzhxag4-Y/exec';
         let bdsSessionToken = '';
         function bdsValidEndpoint(value) {
             try { const url = new URL(value); return url.protocol === 'https:' &&
@@ -2416,6 +2420,7 @@ function hideSaveLoading() {
                     adminSign: document.getElementById('adminSign').value,
                     headMistressSign: document.getElementById('headMistressSign').value,
                     parentSign: document.getElementById('parentSign').value,
+                    academicCoordinatorSign: document.getElementById('academicCoordinatorSign').value,
                     timestamp: editingStudentTimestamp || new Date().toISOString(),
                     recordId: isEditMode && editingStudentData ? editingStudentData.recordId || '' : '',
                     recordVersion: isEditMode && editingStudentData ? editingStudentData.recordVersion || '' : '',
@@ -3006,6 +3011,7 @@ function jumpToPage(page) {
             document.getElementById('adminSign').value = student.adminSign || '';
             document.getElementById('headMistressSign').value = student.headMistressSign || '';
             document.getElementById('parentSign').value = student.parentSign || '';
+            document.getElementById('academicCoordinatorSign').value = student.academicCoordinatorSign || '';
 
             const tbody = document.getElementById('subjectsBody');
             tbody.innerHTML = '';
@@ -3155,6 +3161,7 @@ function jumpToPage(page) {
             const adminSign = document.getElementById('adminSign').value || '';
             const headMistressSign = document.getElementById('headMistressSign').value || '';
             const parentSign = document.getElementById('parentSign').value || '';
+            const academicCoordinatorSign = document.getElementById('academicCoordinatorSign').value || '';
             
             const leftLogoUrl = 'https://raw.githubusercontent.com/penbeam/bds-report-cards/226b18442780cec5aff3c4de43dc445df08f3fe6/images/SZABIST_LOGO.png';
             const rightLogoUrl = 'https://raw.githubusercontent.com/penbeam/bds-report-cards/226b18442780cec5aff3c4de43dc445df08f3fe6/images/BDS-Logo.png';
@@ -3168,7 +3175,8 @@ function jumpToPage(page) {
                 const subject = inputs[0].value || '';
                 const total = inputs[1].value || '';
                 const obtained = inputs[2].value.trim();
-                if (!subject) continue;
+                // Official result cards exclude unassessed rows; 0 and A are meaningful assessments.
+                if (!subject.trim() || !obtained) continue;
                 const calculated = bdsSubjectCalculation(total, obtained);
                 let percentage = calculated.percentage === '' ? '-' : String(calculated.percentage);
                 const grade = calculated.grade;
@@ -3218,14 +3226,14 @@ function jumpToPage(page) {
         max-width: 1100px;
         margin: 0 auto; 
         border: 2px solid #1e3c72; 
-        padding: 20px 5px; 
+        padding: 12px 6px; 
         }
 
         .logo-header { 
         display: flex; 
         align-items: center; 
         justify-content: space-between;
-        margin-bottom: 10px; 
+        margin-bottom: 5px; 
         border-bottom: 2px solid black; 
         padding-bottom: 10px; 
         }
@@ -3291,12 +3299,12 @@ function jumpToPage(page) {
         .student-info { 
         border: 1px solid black; 
         padding: 5px; 
-        margin-bottom: 15px; 
+        margin-bottom: 8px; 
         }
 
         .info-row { 
         display: flex; 
-        margin-bottom: 10px; 
+        margin-bottom: 5px; 
         }
 
         .info-label { 
@@ -3317,13 +3325,13 @@ function jumpToPage(page) {
         table { 
         width: 100%; 
         border-collapse: collapse; 
-        margin-bottom: 20px; 
+        margin-bottom: 9px; 
         }
 
         th { 
         background: white; 
         color: black; 
-        padding: 10px 5px; 
+        padding: 7px 4px; 
         border: 1px solid black;
         font-size: 12px; 
         font-weight: bold;
@@ -3333,45 +3341,53 @@ function jumpToPage(page) {
 
         td { 
         border: 1px solid black; 
-        padding: 10px 5px !important; 
-        font-size:12px;
+        padding: 6px 4px !important; 
+        font-size:11px;
         }
 
         .summary-box { 
         border: 1px solid black; 
-        padding: 10px 30px; 
-        margin-bottom: 20px; 
+        padding: 7px 12px; 
+        margin-bottom: 9px; 
         background: white;
-        font-size: 15px; 
+        font-size: 12px; 
         text-align: center;
         }
 
-        .comments-box { 
-        border: 1px solid black; 
-        padding: 10px 20px; 
-        margin-bottom: 60px;
-        font-size: 15px; 
+        .comments-box {
+            border: 1px solid black;
+            padding: 7px 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            break-inside: avoid;
         }
-
-        .signatures { 
-        display: flex; 
-        justify-content: space-between; 
-        margin-top: 50px; 
+        .signatures {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            align-items: end;
+            gap: 7px;
+            margin-top: 14px;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
-
-        .signature-item { 
-        text-align: center; 
-        width: 150px; 
-        font-size: 12px;
-        font-style: italic;
-font-weight: 600;
+        .signature-item {
+            min-width: 0;
+            text-align: center;
+            font-size: 9px;
+            line-height: 1.2;
+            font-style: italic;
+            font-weight: 600;
         }
-
-        .signature-line { 
-        border-top: 1px solid black !important; 
-        margin-bottom: 5px; 
+        .signature-value {
+            height: 17px;
+            font-size: 10px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
         }
-
+        .signature-line {
+            border-top: 1px solid black !important;
+            margin-bottom: 4px;
+        }
         .date { 
         text-align: right; 
         margin-top: 30px;
@@ -3413,26 +3429,31 @@ font-weight: 600;
 
         <div class="summary-box"><div><strong>Overall Obtained Marks (out of ${totalMarksSum}):</strong> ${totalObtained}<strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Percentage:</strong> ${hasAssessedSubjects ? overallPercentage + "%" : "-"} &nbsp;&nbsp; <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grade:</strong> ${overallGrade}</div></div>
 
-        <div class="comments-box"><div><strong>Class Teacher's Comments:</strong></div><div style="margin-top:10px; font-style:italic; white-space:pre-wrap;">${escapeHTML(teacherComments)}</div></div>
+        <div class="comments-box"><div><strong>Class Teacher's Comments:</strong></div><div style="margin-top:4px; font-style:italic; white-space:pre-wrap;">${escapeHTML(teacherComments)}</div></div>
 
         <div class="signatures">
     <div class="signature-item">
-        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(classTeacherSign) || '&nbsp;'}</div>
+        <div class="signature-value">${escapeHTML(classTeacherSign) || '&nbsp;'}</div>
         <div class="signature-line"></div>
         <div>Class Teacher Signature</div>
     </div>
     <div class="signature-item">
-        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(adminSign) || '&nbsp;'}</div>
+        <div class="signature-value">${escapeHTML(adminSign) || '&nbsp;'}</div>
         <div class="signature-line"></div>
         <div>Admin Signature</div>
     </div>
     <div class="signature-item">
-        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(headMistressSign) || '&nbsp;'}</div>
+        <div class="signature-value">${escapeHTML(academicCoordinatorSign) || '&nbsp;'}</div>
+        <div class="signature-line"></div>
+        <div>Academic Coordinator Signature</div>
+    </div>
+    <div class="signature-item">
+        <div class="signature-value">${escapeHTML(headMistressSign) || '&nbsp;'}</div>
         <div class="signature-line"></div>
         <div>Head Mistress Signature</div>
     </div>
     <div class="signature-item">
-        <div style="font-size: 12px; font-weight: bold; height: 18px;">${escapeHTML(parentSign) || '&nbsp;'}</div>
+        <div class="signature-value">${escapeHTML(parentSign) || '&nbsp;'}</div>
         <div class="signature-line"></div>
         <div>Parent Signature</div>
     </div>
@@ -3552,6 +3573,7 @@ font-weight: 600;
     document.getElementById('adminSign').value = '';
     document.getElementById('headMistressSign').value = '';
     document.getElementById('parentSign').value = '';
+    document.getElementById('academicCoordinatorSign').value = '';
 
     // 2. Reset the subjects table
     loadSubjects();
